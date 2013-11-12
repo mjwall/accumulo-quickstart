@@ -18,5 +18,5 @@ LAUNCH_JAR=`dirname $0`/sbt-launch-0.12.4.jar
 if [ -z "$SBT_OPTS" ]; then
   SBT_OPTS="-Xmx1024M -XX:MaxPermSize=512m"
 fi
-  
+
 java "${SBT_OPTS}" -jar "${LAUNCH_JAR}" "$@" 
