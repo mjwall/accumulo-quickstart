@@ -15,3 +15,33 @@ libraryDependencies ++= Seq(
   "org.apache.zookeeper" % "zookeeper" % "3.3.6" intransitive(),
   "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "tar.gz", "tar.gz", "bin")) intransitive()
 )
+
+val installPath = taskKey[File]("Directory for install of accumulo and related packages.")
+
+installPath := baseDirectory.value / "install"
+
+val extractDependencies = taskKey[Boolean]("Extract accumulo and related packages into installPath")
+
+def printMethods(o: Object) {
+  println("Methods " + o)
+  o.getClass.getMethods.map(_.getName).sorted.map(m =>
+    println(m)
+  )
+}
+
+
+extractDependencies := {
+  sbt.IO.createDirectory(installPath.value)
+  libraryDependencies.value.map( d =>
+    if (List("hadoop-core","zookeeper").contains(d.name)) {
+      println("Unjarring " + d.name)
+    } else if (d.name == "accumulo") {
+      println("Artifacts " + d.explicitArtifacts(0))
+      printMethods(d.explicitArtifacts(0))
+      println("Untarring " + d.name)
+    }
+  )
+  true
+}
+
+val extractOneDependency = taskKey[Boolean]("Extract one dependency")

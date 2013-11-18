@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 
+/**
 object AccumuloQuickstartBuild extends Build {
   val aqsettings = Defaults.defaultSettings ++ Seq(
     organization := "com.mjwall",
@@ -12,7 +13,7 @@ object AccumuloQuickstartBuild extends Build {
   //val rootPath = {
   //  baseDirectory.value.getName
   //}
-  val cloudPath = baseDirectory.getAbsolutePath
+  //val cloudPath = Settings[String]
 
   val hello = TaskKey[Unit]("hello", "Prints 'Hello World'")
 
@@ -23,8 +24,10 @@ object AccumuloQuickstartBuild extends Build {
   val unzipArtifacts = TaskKey[Unit]("unzip-artifacts", "Unzips hadoop, zookeper and accumulo")
 
   val unzipArtifactsTask = unzipArtifacts := {
-
-    println("Unzipping artifacts to " + cloudPath)
+    val cloudPath = { baseDirectory.value / "cloud" }
+    println("basedir " + cloudPath)
+    println("basedir2 " + (baseDirectory in run))
+    //println("Unzipping artifacts to " + cloudPath)
    // ("mkdir -p " + baseDirectory.value + "/cloud").!
     (dependencyClasspath in Compile) map { (cpEntries) =>
       println(cpEntries)
@@ -37,3 +40,4 @@ object AccumuloQuickstartBuild extends Build {
     settings = aqsettings ++ Seq(helloTask, unzipArtifactsTask)
   )
 }
+**/

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-LAUNCH_JAR=`dirname $0`/sbt-launch-0.12.4.jar
+LAUNCH_JAR=`dirname $0`/sbt-launch-0.13.0.jar
 
 if [ -z "$SBT_OPTS" ]; then
   SBT_OPTS="-Xmx1024M -XX:MaxPermSize=512m"
 fi
 
-java "${SBT_OPTS}" -jar "${LAUNCH_JAR}" "$@" 
+java "${SBT_OPTS}" -jar "${LAUNCH_JAR}" "$@"
