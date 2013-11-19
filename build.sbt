@@ -32,7 +32,14 @@ def printMethods(o: Object) {
 
 extractDependencies := {
   sbt.IO.createDirectory(installPath.value)
-  Build.data((dependencyClasspath in Runtime).value).map ( f => println(f.getName))
+  Build.data((dependencyClasspath in Runtime).value).map ( f =>
+    f.getName match {
+      case name if name.startsWith("hadoop") => println("Hadoop here")
+      //case ("zookeeper") => println("Zookeeper here")
+      //case ("accumulo") => println("Shave a yak")
+      case name => println(name)
+    }
+  )
   //(update) map {
   //  (updateReport) =>
   //    updateReport.allFiles foreach {
