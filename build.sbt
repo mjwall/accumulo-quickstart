@@ -13,7 +13,7 @@ autoScalaLibrary := false
 libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-core" % "1.0.4" intransitive(),
   "org.apache.zookeeper" % "zookeeper" % "3.3.6" intransitive(),
-  "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "tar.gz", "tar.gz", "bin")) intransitive()
+  "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
 )
 
 val installPath = taskKey[File]("Directory for install of accumulo and related packages.")
@@ -32,15 +32,34 @@ def printMethods(o: Object) {
 
 extractDependencies := {
   sbt.IO.createDirectory(installPath.value)
-  libraryDependencies.value.map( d =>
-    if (List("hadoop-core","zookeeper").contains(d.name)) {
-      println("Unjarring " + d.name)
-    } else if (d.name == "accumulo") {
-      println("Artifacts " + d.explicitArtifacts(0))
-      printMethods(d.explicitArtifacts(0))
-      println("Untarring " + d.name)
-    }
-  )
+  Build.data((dependencyClasspath in Runtime).value).map ( f => println(f.getName))
+  //(update) map {
+  //  (updateReport) =>
+  //    updateReport.allFiles foreach {
+  //      file =>
+  //        println(file)
+  //    }
+ // }
+  //(externalDependencyClasspath in Compile).value.map {
+  //  cp =>
+  //    cp.map {
+  //      attributed =>
+  //        println(attributed)
+  //    }
+  //}
+  //updateReport.allFiles.map { f =>
+  //  println(f)
+ // }
+  println("----")
+  //libraryDependencies.value.map( d =>
+  //  if (List("hadoop-core","zookeeper").contains(d.name)) {
+  //    println("Unjarring " + d.name)
+  //  } else if (d.name == "accumulo") {
+  //    println("Artifacts " + d.explicitArtifacts(0))
+  //    printMethods(d.explicitArtifacts(0))
+  //    println("Untarring " + d.name)
+  //  }
+  //)
   true
 }
 
