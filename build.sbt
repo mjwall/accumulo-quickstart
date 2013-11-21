@@ -34,10 +34,10 @@ extractDependencies := {
   sbt.IO.createDirectory(installPath.value)
   Build.data((dependencyClasspath in Runtime).value).map ( f =>
     f.getName match {
-      case name if name.startsWith("hadoop") => println("Hadoop here")
-      //case ("zookeeper") => println("Zookeeper here")
-      //case ("accumulo") => println("Shave a yak")
-      case name => println(name)
+      case name if name.startsWith("hadoop") => println("Hadoop here: " + f)
+      case name if name.startsWith("zookeeper") => println("Zookeeper here: " + f)
+      case name if name.startsWith("accumulo") => println("Accumulo here: " + f)
+      case name => None //do nothing
     }
   )
   //(update) map {
