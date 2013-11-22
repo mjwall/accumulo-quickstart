@@ -35,7 +35,7 @@ def untar(file: File, dest: File) {
   println("Untarring " + file + " to " + dest)
 }
 
-val extractDependencies = taskKey[Boolean]("Extract accumulo and related packages into installPath")
+val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
   sbt.IO.createDirectory(installPath.value)
@@ -44,37 +44,9 @@ extractDependencies := {
       case name if name.startsWith("hadoop") => untar(f, installPath.value)
       case name if name.startsWith("zookeeper") => untar(f, installPath.value)
       case name if name.startsWith("accumulo") => untar(f, installPath.value)
-      case name => println("Other: " + f) // None //do nothing
+      case name => None //do nothing
     }
   )
-  //(update) map {
-  //  (updateReport) =>
-  //    updateReport.allFiles foreach {
-  //      file =>
-  //        println(file)
-  //    }
- // }
-  //(externalDependencyClasspath in Compile).value.map {
-  //  cp =>
-  //    cp.map {
-  //      attributed =>
-  //        println(attributed)
-  //    }
-  //}
-  //updateReport.allFiles.map { f =>
-  //  println(f)
- // }
-  println("----")
-  //libraryDependencies.value.map( d =>
-  //  if (List("hadoop-core","zookeeper").contains(d.name)) {
-  //    println("Unjarring " + d.name)
-  //  } else if (d.name == "accumulo") {
-  //    println("Artifacts " + d.explicitArtifacts(0))
-  //    printMethods(d.explicitArtifacts(0))
-  //    println("Untarring " + d.name)
-  //  }
-  //)
-  true
 }
 
 val extractOneDependency = taskKey[Boolean]("Extract one dependency")
