@@ -15,10 +15,10 @@
 # limitations under the License.
 
 LAUNCH_JAR=`dirname $0`/sbt-launch-0.13.0.jar
-echo "Launch jar: ${LAUNCH_JAR}"
+#echo "Launch jar: ${LAUNCH_JAR}"
 
 if [ ! -z "$SBT_OPTS" ]; then
   SBT_OPTS="-Xmx1024M -XX:MaxPermSize=512m"
 fi
 
-java "${SBT_OPTS}" -jar "\"${LAUNCH_JAR}\"" "$@"
+java ${SBT_OPTS} -jar ${LAUNCH_JAR} "$@"

@@ -1,3 +1,14 @@
+//import java.io.BufferedInputStream
+//import java.io.BufferedOutputStream
+//import java.io.File
+//import java.io.FileInputStream
+//import java.io.FileOutputStream
+//import java.io.IOException
+//import java.util.zip.GZIPInputStream
+
+//import org.xeustechnologies.jtar.TarEntry
+//import org.xeustechnologies.jtar.TarInputStream
+
 organization := "com.mjwall"
 
 name := "accumulo-quickstart"
@@ -32,7 +43,72 @@ def printMethods(o: Object) {
 }
 
 def untar(file: File, dest: File) {
+  // assumes gzipped
   println("Untarring " + file + " to " + dest)
+  // boolean result = false
+  // FileInputStream fileInputStream = null
+  // TarInputStream tarArchiveInputStream = null
+  // //String LOG_TAG = JTarUtils.class.getSimpleName();
+  // int BUFFER_SIZE = 8 * 1024
+  // try {
+  //   fileInputStream = new FileInputStream(file);
+  //   //tarArchiveInputStream = (isGZipped) ?
+  //   //new TarInputStream(new GZIPInputStream(fileInputStream, BUFFER_SIZE)) :
+  //   //new TarInputStream(new BufferedInputStream(fileInputStream, BUFFER_SIZE));
+  //   //result = untar(tarArchiveInputStream, outputDir);
+  //   tarArchiveInputStream = new TarInputStream(new GZIPInputStream(fileInputStream, BUFFER_SIZE))
+  //   try {
+  //     TarEntry entry;
+  //     while ((entry = tarArchiveInputStream.getNextEntry()) != null) {
+  //       final File file = new File(outputDir, entry.getName());
+  //       if (entry.isDirectory()) {
+  //         if (!file.exists()) {
+  //           if (file.mkdirs()) {
+  //             //Log.d(LOG_TAG, "%s directory created", file);
+  //           } else {
+  //             //Log.w(LOG_TAG, "%s failure to create directory.", file);
+  //             return false;
+  //           }
+  //         } else {
+  //           //Log.w(LOG_TAG, "%s directory is already created", file);
+  //         }
+  //       } else {
+  //         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+  //         try {
+  //           FileUtils.copyFile(tarArchiveInputStream, out);
+  //           out.flush();
+  //         } finally {
+  //           try {
+  //             out.close();
+  //           } catch (IOException e) {
+  //             //Log.e(LOG_TAG, e);
+  //           }
+  //         }
+  //         //Log.d(LOG_TAG, "%s file created", file);
+  //       }
+  //     }
+  //     result = true;
+  //   } catch (IOException e) {
+  //     //Log.e(LOG_TAG, e);
+  //   }
+  // } catch (IOException e) {
+  //   //Log.e(LOG_TAG, e);
+  // } finally {
+  //   if (tarArchiveInputStream != null) {
+  //     try {
+  //       tarArchiveInputStream.close();
+  //     } catch (IOException e) {
+  //       //Log.e(LOG_TAG, e);
+  //     }
+  //   } else if (fileInputStream != null) {
+  //     try {
+  //       fileInputStream.close();
+  //     } catch (IOException e) {
+  //       //Log.e(LOG_TAG, e);
+  //     }
+  //   }
+  // }
+  // return result;
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
