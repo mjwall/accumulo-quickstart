@@ -31,8 +31,15 @@ def printMethods(o: Object) {
   )
 }
 
+val jTarUtil = taskKey[JTarUtil]("")
+
+//jTarUtil := tarutil
+
 def untar(file: File, dest: File) {
   println("Untarring " + file + " to " + dest)
+  val tu = new JTarUtilImpl
+  tu.sayHi
+  //jTarUtil.value.sayHi
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
