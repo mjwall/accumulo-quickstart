@@ -1,57 +1,74 @@
 import sbt._
 import Keys._
 
+import java.util.zip.GZIPInputStream
+import java.io.{BufferedInputStream, BufferedOutputStream, File
+  ,FileInputStream, FileOutputStream, IOException}
+import org.kamranzafar.jtar.{TarEntry, TarInputStream}
+
 trait JTarUtil {
-  def sayHi: Unit
+  def untar(src: File, dest: File): Unit
 }
 
 class JTarUtilImpl extends JTarUtil {
-  def sayHi: Unit = {
-    println("Hi from JTarUtil")
-  }
-}
 
-object tarutil {
-  def apply: JTarUtil = new JTarUtilImpl
-}
+  def untar(src: File, dest: File): Unit = {
+    println("Untarring " + src + " to " + dest)
 
-/**
-object AccumuloQuickstartBuild extends Build {
-  val aqsettings = Defaults.defaultSettings ++ Seq(
-    organization := "com.mjwall",
-    name         := "accumulo-quickstart",
-    version      := "1.0",
-    scalaVersion := "2.9.2" // for compiling this file
-  )
+    val BUFFER_SIZE = 8 * 1024
+    try {
+      val tarArchiveInputStream = new TarInputStream(new GZIPInputStream(new FileInputStream(src), BUFFER_SIZE))
+      var entry: TarEntry = null
 
-  //val rootPath = {
-  //  baseDirectory.value.getName
-  //}
-  //val cloudPath = Settings[String]
-
-  val hello = TaskKey[Unit]("hello", "Prints 'Hello World'")
-
-  val helloTask = hello := {
-    println("Hello World")
-  }
-
-  val unzipArtifacts = TaskKey[Unit]("unzip-artifacts", "Unzips hadoop, zookeper and accumulo")
-
-  val unzipArtifactsTask = unzipArtifacts := {
-    val cloudPath = { baseDirectory.value / "cloud" }
-    println("basedir " + cloudPath)
-    println("basedir2 " + (baseDirectory in run))
-    //println("Unzipping artifacts to " + cloudPath)
-   // ("mkdir -p " + baseDirectory.value + "/cloud").!
-    (dependencyClasspath in Compile) map { (cpEntries) =>
-      println(cpEntries)
+      while ({entry = tarArchiveInputStream.getNextEntry; entry != null}) {
+        val file = new File(dest, entry.getName())
+        if (entry.isDirectory()) {
+          if (!file.exists()) {
+            if (file.mkdirs()) {
+              println("Directoy created: " + file)
+            } else {
+              println("Couldn't make directory: " + file)
+            }
+          } else {
+            println("Directory exists: " + file)
+          }
+        } else {
+          val out = new BufferedOutputStream(new FileOutputStream(file))
+          try {
+            FileUtils.copyFile(in, out);
+            out.flush()
+          } finally {
+            try {
+              out.close()
+            } catch (IOException e) {
+              println("Error inside tar: " + e.getMessage())
+            }
+          }
+          println("File created: " + file)
+        }
+      }
+    } catch (IOException e) {
+      println("Error " + e.getMessage())
+    } finally {
+      if (tarArchiveInputStream != null) {
+        try {
+          tarArchiveInputStream.close()
+        } catch (IOException e) {
+          println("Error closing " + e.getMessage())
+        }
+      } else if (fileInputStream != null) {
+        try {
+          fileInputStream.close()
+        } catch (IOException e) {
+          println("Error closing stream2 " + e.getMessage())
+        }
+      }
     }
   }
 
-  lazy val project = Project (
-    "project",
-    file ("."),
-    settings = aqsettings ++ Seq(helloTask, unzipArtifactsTask)
-  )
+
 }
-**/
+
+//object tarutil {
+//  def apply: JTarUtil = new JTarUtilImpl
+//}

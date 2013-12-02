@@ -4,7 +4,7 @@ name := "accumulo-quickstart"
 
 version := "1.0"
 
-// no scala stuff please
+// not building scala stuff
 
 crossPaths := false
 
@@ -15,10 +15,8 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
   "org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
   // accumulo dist is :)
-  "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive(),
-  // actually dependencies
-  "org.kamranzafar" % "jtar" % "2.2"
-)
+  "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
+ )
 
 val installPath = taskKey[File]("Directory for install of accumulo and related packages.")
 
@@ -31,15 +29,9 @@ def printMethods(o: Object) {
   )
 }
 
-val jTarUtil = taskKey[JTarUtil]("")
-
-//jTarUtil := tarutil
-
 def untar(file: File, dest: File) {
-  println("Untarring " + file + " to " + dest)
   val tu = new JTarUtilImpl
-  tu.sayHi
-  //jTarUtil.value.sayHi
+  tu.untar(file, dest)
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
@@ -55,5 +47,3 @@ extractDependencies := {
     }
   )
 }
-
-val extractOneDependency = taskKey[Boolean]("Extract one dependency")
