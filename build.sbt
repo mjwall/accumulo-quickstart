@@ -30,8 +30,9 @@ def printMethods(o: Object) {
 }
 
 def untar(file: File, dest: File) {
-  val tu = new JTarUtilImpl
-  tu.untar(file, dest)
+  //val tu = new JTarUtilImpl
+  //tu.untar(file, dest)
+  Unpack.apply(file.getAbsolutePath)
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")

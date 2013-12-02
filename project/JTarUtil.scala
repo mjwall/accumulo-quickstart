@@ -14,7 +14,7 @@ class JTarUtilImpl extends JTarUtil {
 
   def untar(src: File, dest: File): Unit = {
     println("Untarring " + src + " to " + dest)
-
+  }/*
     val BUFFER_SIZE = 8 * 1024
     try {
       val tarArchiveInputStream = new TarInputStream(new GZIPInputStream(new FileInputStream(src), BUFFER_SIZE))
@@ -65,7 +65,7 @@ class JTarUtilImpl extends JTarUtil {
       }
     }
   }
-
+   */
 
 }
 
