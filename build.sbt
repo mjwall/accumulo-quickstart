@@ -12,8 +12,8 @@ autoScalaLibrary := false
 
 libraryDependencies ++= Seq(
   // hadoop and zookeeper dists are not in a maven repo :(
- // "org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
-//  "org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
+  "org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
+  "org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
   // accumulo dist is :)
   "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
  )
@@ -32,12 +32,14 @@ def printMethods(o: Object) {
 def untar(file: File, dest: File) {
   //val tu = new JTarUtilImpl
   //tu.untar(file, dest)
-  Unpack.apply(file.getAbsolutePath, dest)
+  println(s"Extracting ${file.getName} to ${dest.getName}")
+  Unpack.apply(file, dest)
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
+  sbt.IO.delete(installPath.value)
   sbt.IO.createDirectory(installPath.value)
   Build.data((dependencyClasspath in Runtime).value).map ( f =>
     f.getName match {
