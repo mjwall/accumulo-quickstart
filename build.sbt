@@ -29,24 +29,46 @@ def printMethods(o: Object) {
   )
 }
 
+val removeInstallPath = taskKey[Unit]("Remove the installPath if it exists")
+
+removeInstallPath := {
+  val path = installPath.value
+  if (path.exists) {
+    println(s"Removing ${path}")
+    sbt.IO.delete(path)
+  } else {
+    println(s"Path ${path} doesn't exist")
+  }
+}
+
 def untar(file: File, dest: File) {
-  //val tu = new JTarUtilImpl
-  //tu.untar(file, dest)
   println(s"Extracting ${file.getName} to ${dest.getName}")
-  Unpack.apply(file, dest)
+  Unpack.gunzipTar(file, dest)
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
-  sbt.IO.delete(installPath.value)
-  sbt.IO.createDirectory(installPath.value)
-  Build.data((dependencyClasspath in Runtime).value).map ( f =>
-    f.getName match {
-      case name if name.startsWith("hadoop") => untar(f, installPath.value)
-      case name if name.startsWith("zookeeper") => untar(f, installPath.value)
-      case name if name.startsWith("accumulo") => untar(f, installPath.value)
-      case name => None //do nothing
-    }
-  )
+  val dest = installPath.value
+  if (dest.exists) {
+    println(s"Install path ${dest} exists, try running removeInstallPath")
+  } else {
+    sbt.IO.createDirectory(dest)
+    Build.data((dependencyClasspath in Runtime).value).map ( f =>
+      f.getName match {
+        case name if name.startsWith("hadoop") => untar(f, dest)
+        case name if name.startsWith("zookeeper") => untar(f, dest)
+        case name if name.startsWith("accumulo") => untar(f, dest)
+        case name => None //do nothing
+      }
+    )
+  }
+}
+
+val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
+
+copyConfigs := {
+  val configDir = new File("src/main/resources")
+  println(s"Copying configs from ${configDir} to ${installPath.value}")
+  sbt.IO.copyDirectory(configDir, installPath.value)
 }

@@ -1,21 +1,16 @@
-import org.apache.commons.compress.archivers.ArchiveStreamFactory
-import org.apache.commons.compress.archivers.ArchiveInputStream
-import org.apache.commons.compress.archivers.ArchiveEntry
-import org.apache.commons.compress.compressors.CompressorStreamFactory
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+//import org.apache.commons.compress.archivers.ArchiveStreamFactory
+//import org.apache.commons.compress.archivers.ArchiveInputStream
+//import org.apache.commons.compress.archivers.ArchiveEntry
+//import org.apache.commons.compress.compressors.CompressorStreamFactory
+//import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
-import java.io.{BufferedInputStream, BufferedOutputStream, File
-  ,FileInputStream, InputStream, FileOutputStream, IOException }
+import java.io.{BufferedInputStream, BufferedOutputStream, File, FileInputStream, FileOutputStream}
 import org.apache.commons.io.IOUtils
-
 
 object Unpack {
 
-  def apply(tarFile: File, dest: File): Unit = {
+  def gunzipTar(tarFile: File, dest: File): Unit = {
     dest.mkdir()
 
     val tarIn = new TarArchiveInputStream(
