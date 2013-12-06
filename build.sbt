@@ -47,29 +47,57 @@ checkSSH := {
   SSHWrapper.checkLocalhost
 }
 
-def untar(file: File, dest: File) {
+val checkJavaHome = taskKey[String]("Check that JAVA_HOME is set")
+
+checkJavaHome := {
+  val javaHome = System.getenv("JAVA_HOME")
+  // todo, better scala check for null.  Not sure this can be
+  // since we are running scala
+  if (null == javaHome) {
+    throw new RuntimeException("JAVA_HOME is not set")
+  }
+  javaHome
+}
+
+//lazy val hadoopHome = SettingKey[String]("HADOOP_HOME")
+
+//lazy val zookeeperHome = SettingKey[String]("ZOOKEEPER_HOME")
+
+//lazy val accumuloHome = SettingKey[String]("ACCUMULO_HOME")
+
+def untar(file: File, dest: File): String = {
   println(s"Extracting ${file.getName} to ${dest.getName}")
   val topDir = Unpack.gunzipTar(file, dest)
   println(s"Unzipped ${topDir}")
+  topDir
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
   val dest = installPath.value
+  var hHome = ""
+  var zHome = ""
+  var aHome = ""
   if (dest.exists) {
     println(s"Install path ${dest} exists, try running removeInstallPath")
   } else {
     sbt.IO.createDirectory(dest)
     Build.data((dependencyClasspath in Runtime).value).map ( f =>
       f.getName match {
-        case name if name.startsWith("hadoop") => untar(f, dest)
-        case name if name.startsWith("zookeeper") => untar(f, dest)
-        case name if name.startsWith("accumulo") => untar(f, dest)
+        case name if name.startsWith("hadoop") => hHome = untar(f, dest)
+        case name if name.startsWith("zookeeper") => zHome = untar(f, dest)
+        case name if name.startsWith("accumulo") => aHome = untar(f, dest)
         case name => None //do nothing
       }
     )
   }
+  //hadoopHome.value = hHome
+  //zookeeperHome := zHome
+  //accumuloHome := aHome
+  //println(s"Hadoop home: ${hadoopHome.value}")
+  //println(s"Zookeeper home: ${zookeeperHome.value}")
+  //println(s"Accumulo home: ${accumuloHome.value}")
 }
 
 val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
@@ -79,6 +107,8 @@ copyConfigs := {
   println(s"Copying configs from ${configDir} to ${installPath.value}")
   sbt.IO.copyDirectory(configDir, installPath.value)
 }
+
+
 
 // start hadoop and format
 
