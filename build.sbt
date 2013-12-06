@@ -41,9 +41,16 @@ removeInstallPath := {
   }
 }
 
+val checkSSH = taskKey[Boolean]("Check ssh on your box")
+
+checkSSH := {
+  SSHWrapper.checkLocalhost
+}
+
 def untar(file: File, dest: File) {
   println(s"Extracting ${file.getName} to ${dest.getName}")
-  Unpack.gunzipTar(file, dest)
+  val topDir = Unpack.gunzipTar(file, dest)
+  println(s"Unzipped ${topDir}")
 }
 
 val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
@@ -72,3 +79,11 @@ copyConfigs := {
   println(s"Copying configs from ${configDir} to ${installPath.value}")
   sbt.IO.copyDirectory(configDir, installPath.value)
 }
+
+// start hadoop and format
+
+// start zookeeper
+
+// start accumulo
+
+// print message

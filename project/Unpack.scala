@@ -10,7 +10,7 @@ import org.apache.commons.io.IOUtils
 
 object Unpack {
 
-  def gunzipTar(tarFile: File, dest: File): Unit = {
+  def gunzipTar(tarFile: File, dest: File): String = {
     dest.mkdir()
 
     val tarIn = new TarArchiveInputStream(
@@ -24,6 +24,8 @@ object Unpack {
     )
 
     var tarEntry = tarIn.getNextTarEntry()
+
+    val topDir = tarEntry.getName().split(File.separator)(0)
 
     while (tarEntry != null) {
       val file = new File(dest, tarEntry.getName())
@@ -46,6 +48,15 @@ object Unpack {
       tarEntry = tarIn.getNextTarEntry()
     }
     tarIn.close()
+
+    // set bin files to executable
+    val binDir = s"${topDir}${File.separator}bin"
+    for(binFile <- new File(dest, binDir).listFiles) {
+      // use a map here
+      binFile.setExecutable(true, false)
+    }
+
+    return topDir
   }
 
 }
