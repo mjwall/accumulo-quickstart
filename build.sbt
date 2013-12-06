@@ -1,3 +1,5 @@
+import scala.collection.mutable.HashMap
+
 organization := "com.mjwall"
 
 name := "accumulo-quickstart"
@@ -59,20 +61,14 @@ checkJavaHome := {
   javaHome
 }
 
-//lazy val hadoopHome = SettingKey[String]("HADOOP_HOME")
-
-//lazy val zookeeperHome = SettingKey[String]("ZOOKEEPER_HOME")
-
-//lazy val accumuloHome = SettingKey[String]("ACCUMULO_HOME")
-
 def untar(file: File, dest: File): String = {
   println(s"Extracting ${file.getName} to ${dest.getName}")
   val topDir = Unpack.gunzipTar(file, dest)
-  println(s"Unzipped ${topDir}")
+  //println(s"Unzipped ${topDir}")
   topDir
 }
 
-val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
+val extractDependencies = taskKey[HashMap[String, String]]("Extract accumulo and related packages into installPath, returns hash map with home locations")
 
 extractDependencies := {
   val dest = installPath.value
@@ -92,12 +88,9 @@ extractDependencies := {
       }
     )
   }
-  //hadoopHome.value = hHome
-  //zookeeperHome := zHome
-  //accumuloHome := aHome
-  //println(s"Hadoop home: ${hadoopHome.value}")
-  //println(s"Zookeeper home: ${zookeeperHome.value}")
-  //println(s"Accumulo home: ${accumuloHome.value}")
+  val homes = HashMap("hadoopHome" -> hHome, "zookeeperHome" -> zHome, "accumuloHome" -> aHome)
+  println(s"Homes ${homes}")
+  homes
 }
 
 val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
