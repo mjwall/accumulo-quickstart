@@ -1,0 +1,4 @@
+#!/bin/bash
+CDPATH=:/
+cd $ACCUMULO_HOME
+bin/accumulo shell $@

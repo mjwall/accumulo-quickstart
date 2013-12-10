@@ -1,2 +1,4 @@
 target/
 install/
+.idea
+.idea_modules

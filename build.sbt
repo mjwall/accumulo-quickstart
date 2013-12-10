@@ -77,6 +77,7 @@ extractDependencies := {
   var aHome = ""
   if (dest.exists) {
     println(s"Install path ${dest} exists, try running removeInstallPath")
+    HashMap()
   } else {
     sbt.IO.createDirectory(dest)
     Build.data((dependencyClasspath in Runtime).value).map ( f =>
@@ -87,10 +88,10 @@ extractDependencies := {
         case name => None //do nothing
       }
     )
+    val homes = HashMap("hadoopHome" -> hHome, "zookeeperHome" -> zHome, "accumuloHome" -> aHome)
+    println(s"Homes ${homes}")
+    homes
   }
-  val homes = HashMap("hadoopHome" -> hHome, "zookeeperHome" -> zHome, "accumuloHome" -> aHome)
-  println(s"Homes ${homes}")
-  homes
 }
 
 val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
@@ -98,10 +99,40 @@ val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
 copyConfigs := {
   val configDir = new File("src/main/resources")
   println(s"Copying configs from ${configDir} to ${installPath.value}")
-  sbt.IO.copyDirectory(configDir, installPath.value)
+  sbt.IO.copyDirectory(configDir, installPath.value, false, true)
+  // set bin files to executable
+  val binDir = s"${installPath.value}${java.io.File.separator}bin"
+  for(binFile <- new File(binDir).listFiles) {
+    // use a map here
+    binFile.setExecutable(true, false)
+  }
 }
 
+def replaceStringInFile(filename: String, toReplace: String, replacement: String) = {
+  // cd src/main/resources && grep -rl REPLACE .
+  // ./accumulo-1.5.0/conf/accumulo-env.sh
+  // ./bin/cloud-env
+  // ./hadoop-1.0.4/conf/hadoop-env.sh
+  // ./hadoop-1.0.4/conf/hdfs-site.xml
+  // ./hadoop-1.0.4/conf/mapred-site.xml
+  // ./zookeeper-3.3.6/conf/zoo.cfg
+  // read file in to string
+  //var inString = io.File(filename).slurp
+  // replace
+  //inString.replaceAll(toReplace, replacement)
+  // write file out
+  //Path(filename).toFile.writeAll(inString)
+}
 
+// check ssh and java
+
+// get tar.gz files
+
+// extract tar.gz files
+
+// copy custom configs
+
+// filter configs replacing home directories
 
 // start hadoop and format
 

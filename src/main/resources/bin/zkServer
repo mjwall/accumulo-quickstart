@@ -1,0 +1,3 @@
+CDPATH=:/
+cd $ZOOKEEPER_HOME/bin 
+zkServer.sh $@

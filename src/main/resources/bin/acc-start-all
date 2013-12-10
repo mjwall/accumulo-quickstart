@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Starting Accumulo"
+CDPATH=:/
+cd $ACCUMULO_HOME
+bin/start-all.sh

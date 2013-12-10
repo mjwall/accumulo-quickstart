@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Stopping Zookeeper"
+CDPATH=:/
+cd $ZOOKEEPER_HOME
+$ZOOKEEPER_HOME/bin/zkServer.sh stop
