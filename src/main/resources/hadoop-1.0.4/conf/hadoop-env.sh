@@ -6,12 +6,10 @@
 # remote nodes.
 
 # The java implementation to use.  Required.
-export JAVA_HOME=/Library/Java/Home
-# export JAVA_HOME=REPLACE_JAVA_HOME
+export JAVA_HOME=REPLACE_JAVA_HOME
 # export JAVA_HOME=/usr/lib/j2sdk1.5-sun
 
-export HADOOP_PREFIX=/Users/mjwall/Desktop/cloud/hadoop-1.0.4
-# export HADOOP_PREFIX=REPLACE_HADOOP_HOME
+export HADOOP_PREFIX=REPLACE_HADOOP_PREFIX
 
 # Extra Java CLASSPATH elements.  Optional.
 # export HADOOP_CLASSPATH=

@@ -10,26 +10,17 @@
   </property>
   <property>
     <name>dfs.name.dir</name>
-    <!--
     <value>REPLACE_HDFS_PATH/name</value>
-    -->
-    <value>/Users/mjwall/Desktop/cloud/hdfs/name</value>
     <final>true</final>
   </property>
   <property>
     <name>dfs.data.dir</name>
-    <!--
     <value>REPLACE_HDFS_PATH/data</value>
-    -->
-    <value>/Users/mjwall/Desktop/cloud/hdfs/data</value>
     <final>true</final>
   </property>
   <property>
     <name>fs.checkpoint.dir</name>
-    <!--
     <value>REPLACE_HDFS_PATH/namesecondary</value>
-    -->
-    <value>/Users/mjwall/Desktop/cloud/hdfs/namesecondary</value>
     <final>true</final>
   </property>
   <!-- https://issues.apache.org/jira/browse/ACCUMULO-623 -->

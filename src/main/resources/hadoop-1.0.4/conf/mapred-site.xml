@@ -10,10 +10,7 @@
   </property>
   <property>
     <name>mapred.local.dir</name>
-    <!--
     <value>REPLACE_MAPRED_PATH</value>
-    -->
-    <value>/Users/mjwall/Desktop/cloud/mapred</value>
   </property>
   <!-- mapred.system.dir is an hdfs directory -->
 </configuration>

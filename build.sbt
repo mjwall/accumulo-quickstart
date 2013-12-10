@@ -61,54 +61,72 @@ checkJavaHome := {
   javaHome
 }
 
-def untar(file: File, dest: File): String = {
-  println(s"Extracting ${file.getName} to ${dest.getName}")
-  val topDir = Unpack.gunzipTar(file, dest)
-  //println(s"Unzipped ${topDir}")
-  topDir
-}
-
-val extractDependencies = taskKey[HashMap[String, String]]("Extract accumulo and related packages into installPath, returns hash map with home locations")
+val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
   val dest = installPath.value
-  var hHome = ""
-  var zHome = ""
-  var aHome = ""
+  def untar(file: File): String = {
+    println(s"Extracting ${file.getName} to ${dest.getName}")
+    Unpack.gunzipTar(file, dest)
+  }
   if (dest.exists) {
     println(s"Install path ${dest} exists, try running removeInstallPath")
-    HashMap()
   } else {
     sbt.IO.createDirectory(dest)
     Build.data((dependencyClasspath in Runtime).value).map ( f =>
       f.getName match {
-        case name if name.startsWith("hadoop") => hHome = untar(f, dest)
-        case name if name.startsWith("zookeeper") => zHome = untar(f, dest)
-        case name if name.startsWith("accumulo") => aHome = untar(f, dest)
+        case name if name.startsWith("hadoop") => untar(f)
+        case name if name.startsWith("zookeeper") => untar(f)
+        case name if name.startsWith("accumulo") => untar(f)
         case name => None //do nothing
       }
     )
-    val homes = HashMap("hadoopHome" -> hHome, "zookeeperHome" -> zHome, "accumuloHome" -> aHome)
-    println(s"Homes ${homes}")
-    homes
   }
 }
 
 val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
 
 copyConfigs := {
-  val configDir = new File("src/main/resources")
-  println(s"Copying configs from ${configDir} to ${installPath.value}")
-  sbt.IO.copyDirectory(configDir, installPath.value, false, true)
-  // set bin files to executable
-  val binDir = s"${installPath.value}${java.io.File.separator}bin"
-  for(binFile <- new File(binDir).listFiles) {
-    // use a map here
-    binFile.setExecutable(true, false)
+  if (new File(installPath.value, "bin").exists) {
+    println(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
+  } else {
+    val configDir = new File("src/main/resources")
+    println(s"Copying configs from ${configDir} to ${installPath.value}")
+    sbt.IO.copyDirectory(configDir, installPath.value, true, true)
+    // set bin files to executable
+    val binDir = s"${installPath.value}${java.io.File.separator}bin"
+    for(binFile <- new File(binDir).listFiles) {
+      // use a map here
+      binFile.setExecutable(true, false)
+    }
   }
 }
 
-def replaceStringInFile(filename: String, toReplace: String, replacement: String) = {
+val getHomePaths = taskKey[HashMap[String,String]]("Returns hashmap of home directories in installPath")
+
+getHomePaths := {
+  val rootPath = installPath.value
+  var homes = HashMap[String, String]()
+  homes += "quickstart" -> rootPath.getAbsolutePath
+  if (rootPath.exists) {
+    for(dir <- installPath.value.listFiles) {
+      if (dir.isDirectory) {
+        dir.getName match {
+          case name if name.startsWith("hadoop") => homes += "hadoop" -> dir.getAbsolutePath
+          case name if name.startsWith("zookeeper") => homes += "zookeeper" -> dir.getAbsolutePath
+          case name if name.startsWith("accumulo") => homes += "accumulo" -> dir.getAbsolutePath
+          case name => None //do nothing
+        }
+      }
+    }
+  }
+  homes
+}
+
+val replacePathsInConfigs = taskKey[Unit]("Replaces Paths in config files")
+
+replacePathsInConfigs := {
+  // TODO: think about 2 config directory, one that needs replacement and one that doesn't
   // cd src/main/resources && grep -rl REPLACE .
   // ./accumulo-1.5.0/conf/accumulo-env.sh
   // ./bin/cloud-env
@@ -116,12 +134,64 @@ def replaceStringInFile(filename: String, toReplace: String, replacement: String
   // ./hadoop-1.0.4/conf/hdfs-site.xml
   // ./hadoop-1.0.4/conf/mapred-site.xml
   // ./zookeeper-3.3.6/conf/zoo.cfg
-  // read file in to string
-  //var inString = io.File(filename).slurp
-  // replace
-  //inString.replaceAll(toReplace, replacement)
-  // write file out
-  //Path(filename).toFile.writeAll(inString)
+  val rootPath = installPath.value
+  val files = List(
+    new File(rootPath, "bin/cloud-env"),
+    new File(rootPath, "hadoop-1.0.4/conf/hadoop-env.sh"),
+    new File(rootPath, "hadoop-1.0.4/conf/hdfs-site.xml"),
+    new File(rootPath, "hadoop-1.0.4/conf/mapred-site.xml"),
+    new File(rootPath, "zookeeper-3.3.6/conf/zoo.cfg"),
+    new File(rootPath, "accumulo-1.5.0/conf/accumulo-env.sh")
+  )
+  val replacements = getReplaceValues.value
+  for(f <- files) {
+    println(s"replacing in ${f}")
+    // read file in to string
+    // TODO: try sbt.io.readLines
+    val source = scala.io.Source.fromFile(f.getAbsolutePath)
+    var inString = source.mkString
+    source.close()
+    //println(inString)
+    // replace
+    replacements.foreach{
+      case (key,value) => inString.replaceAll(key, value)
+    }
+    //println("---------")
+    //println(inString)
+    // write file out
+    sbt.IO.write(f, inString)
+  }
+}
+
+val getReplaceValues = taskKey[HashMap[String,String]]("Get hashmap of strings to replace")
+
+getReplaceValues := {
+  val replacements = HashMap[String,String]()
+  val homePath = getHomePaths.value
+  val rootPath = installPath.value.getAbsolutePath
+  replacements += "REPLACE_JAVA_HOME" -> checkJavaHome.value
+  replacements += "REPLACE_CLOUD_INSTALL_HOME" -> rootPath
+  replacements += "REPLACE_HADOOP_PREFIX" -> homePath("hadoop")
+  replacements += "REPLACE_ZOOKEEPER_HOME" -> homePath("zookeeper")
+  replacements += "REPLACE_ACCUMULO_HOME" -> homePath("accumulo")
+  replacements += "REPLACE_HDFS_PATH" -> s"${rootPath}${java.io.File.separator}hdfs"
+  replacements += "REPLACE_MAPRED_PATH" -> s"${rootPath}${java.io.File.separator}mapred"
+  replacements += "REPLACE_ZOOKEEPER_DATADIR" -> s"${rootPath}${java.io.File.separator}zk-data"
+  replacements
+}
+
+val install = taskKey[Unit]("Run all tasks to install Accumulo and friends")
+
+install := {
+  if (checkSSH.value) {
+    //val javaHome = checkJavaHome.value
+    //extractDependencies.value()
+    //copyConfigs.value()
+    //replacePathsInConfigs.value()
+    print("Done")
+  } else {
+    println("SSH not setup")
+  }
 }
 
 // check ssh and java
