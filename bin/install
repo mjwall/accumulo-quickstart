@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# this script will use the included sbt, download all the components, config them and start them up.
+
+_script_dir() {
+    if [ -z "${SCRIPT_DIR}" ]; then
+    # even resolves symlinks, see
+    # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+        local SOURCE="${BASH_SOURCE[0]}"
+        while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+        SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    fi
+    echo "${SCRIPT_DIR}"
+}
+
+$(_script_dir)/sbt install

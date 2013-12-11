@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$(uname)" == "Darwin" ]; then
+  CMD="open"
+else
+  CMD="xdg-open"
+fi
+${CMD} $HADOOP_PREFIX/docs/api/index.html

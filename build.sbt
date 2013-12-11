@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
 
 val installPath = taskKey[File]("Directory for install of accumulo and related packages.")
 
-installPath := baseDirectory.value / "install"
+installPath := baseDirectory.value / "cloud-install"
 
 def printMethods(o: Object) {
   println("Methods " + o)
@@ -49,19 +49,24 @@ checkSSH := {
   SSHWrapper.checkLocalhost
 }
 
-val checkJavaHome = taskKey[String]("Check that JAVA_HOME is set")
+val checkJavaHome = taskKey[Boolean]("Check that JAVA_HOME is set")
 
 checkJavaHome := {
-  val javaHome = System.getenv("JAVA_HOME")
   // todo, better scala check for null.  Not sure this can be
   // since we are running scala
-  if (null == javaHome) {
-    throw new RuntimeException("JAVA_HOME is not set")
+  if (null == getJavaHome) {
+    false
   }
-  javaHome
+  true
 }
 
-val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
+val getJavaHome = taskKey[String]("Get the configured JAVA_HOME")
+
+getJavaHome := {
+  System.getenv("JAVA_HOME")
+}
+
+val extractDependencies = taskKey[Boolean]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
   val dest = installPath.value
@@ -71,6 +76,7 @@ extractDependencies := {
   }
   if (dest.exists) {
     println(s"Install path ${dest} exists, try running removeInstallPath")
+    false
   } else {
     sbt.IO.createDirectory(dest)
     Build.data((dependencyClasspath in Runtime).value).map ( f =>
@@ -81,14 +87,16 @@ extractDependencies := {
         case name => None //do nothing
       }
     )
+    true
   }
 }
 
-val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
+val copyConfigs = taskKey[Boolean]("Copies src/main/resources into installPath")
 
 copyConfigs := {
   if (new File(installPath.value, "bin").exists) {
     println(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
+    false
   } else {
     val configDir = new File("src/main/resources")
     println(s"Copying configs from ${configDir} to ${installPath.value}")
@@ -99,6 +107,7 @@ copyConfigs := {
       // use a map here
       binFile.setExecutable(true, false)
     }
+    true
   }
 }
 
@@ -123,7 +132,7 @@ getHomePaths := {
   homes
 }
 
-val replacePathsInConfigs = taskKey[Unit]("Replaces Paths in config files")
+val replacePathsInConfigs = taskKey[Boolean]("Replaces Paths in config files")
 
 replacePathsInConfigs := {
   // TODO: think about 2 config directory, one that needs replacement and one that doesn't
@@ -145,22 +154,23 @@ replacePathsInConfigs := {
   )
   val replacements = getReplaceValues.value
   for(f <- files) {
+    val filename = f.getAbsolutePath
     println(s"replacing in ${f}")
     // read file in to string
-    // TODO: try sbt.io.readLines
-    val source = scala.io.Source.fromFile(f.getAbsolutePath)
+    val source = scala.io.Source.fromFile(filename)
     var inString = source.mkString
     source.close()
-    //println(inString)
     // replace
     replacements.foreach{
-      case (key,value) => inString.replaceAll(key, value)
+      case (key,value) => inString = inString.replaceAll(key, value)
     }
-    //println("---------")
-    //println(inString)
     // write file out
-    sbt.IO.write(f, inString)
+    f.delete
+    val newFile = new java.io.FileWriter(filename, false)
+    newFile.write(inString)
+    newFile.close
   }
+  true
 }
 
 val getReplaceValues = taskKey[HashMap[String,String]]("Get hashmap of strings to replace")
@@ -169,7 +179,7 @@ getReplaceValues := {
   val replacements = HashMap[String,String]()
   val homePath = getHomePaths.value
   val rootPath = installPath.value.getAbsolutePath
-  replacements += "REPLACE_JAVA_HOME" -> checkJavaHome.value
+  replacements += "REPLACE_JAVA_HOME" -> getJavaHome.value
   replacements += "REPLACE_CLOUD_INSTALL_HOME" -> rootPath
   replacements += "REPLACE_HADOOP_PREFIX" -> homePath("hadoop")
   replacements += "REPLACE_ZOOKEEPER_HOME" -> homePath("zookeeper")
@@ -180,19 +190,14 @@ getReplaceValues := {
   replacements
 }
 
-val install = taskKey[Unit]("Run all tasks to install Accumulo and friends")
+val initAndStart = taskKey[Unit]("format namenode, start hadoop, start zookeeper, init and start accumulo")
 
-install := {
-  if (checkSSH.value) {
-    //val javaHome = checkJavaHome.value
-    //extractDependencies.value()
-    //copyConfigs.value()
-    //replacePathsInConfigs.value()
-    print("Done")
-  } else {
-    println("SSH not setup")
-  }
+initAndStart := {
+  Seq(s"${installPath.value}/bin/init-and-start.sh")!!
 }
+
+addCommandAlias("install", ";extractDependencies;copyConfigs;replacePathsInConfigs;initAndStart")
+//addCommandAlias("install", ";extractDependencies;copyConfigs;replacePathsInConfigs")
 
 // check ssh and java
 
