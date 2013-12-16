@@ -21,9 +21,9 @@ To run this script, clone the repo and run the following from the root directory
     ./bin/install
 
 It will take a while to complete, as it must download the tar.gz files
-for Accumulo, Hadoop and Zookeper.  Once complete, the cloud-install
+for Accumulo, Hadoop and Zookeper.  Once complete, the install-home
 directory will contain everything for this particular installation.
-From the console, source the cloud-install/bin/cloud-env script to
+From the console, source the install-home/bin/cloud-env script to
 setup some environment variables.  There are helper scripts in that
 bin directory.
 

@@ -1,5 +1,2 @@
 target/
-.idea
-.idea_modules
-cloud-install/
-.DS_Store
+install-home/
