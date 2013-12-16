@@ -15,6 +15,20 @@ _script_dir() {
 
 source "$(_script_dir)/cloud-env"
 
+check_running() {
+  echo "Making sure nothing is currently running"
+  jps -lm | grep NameNode || jps -lm | grep QuorumPeer || jps -lm | grep org.apache.accumulo
+  ret=$?
+  if [ "$ret" -eq 0 ]; then
+    echo "Found stuff, it is likely there will be port conflicts.  Please stop what you have running and execute './bin/sbt initAndStart' to finish the install"
+    ret=1
+  else
+    # nothing found running
+    ret=0
+  fi
+  return $ret
+}
+
 format_namenode() {
   cd $HADOOP_PREFIX
   echo "Formatting namenode"
@@ -55,4 +69,4 @@ finish() {
   chmod 644 "$(_script_dir)/$(basename $0)"
 }
 
-format_namenode && start_hadoop && start_zookeeper && init_accumulo && start_accumulo && finish
+check_running && format_namenode && start_hadoop && start_zookeeper && init_accumulo && start_accumulo && finish
