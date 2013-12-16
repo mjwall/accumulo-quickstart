@@ -15,29 +15,44 @@ _script_dir() {
 
 source "$(_script_dir)/cloud-env"
 
-# format namenode and start hadoop
-cd $HADOOP_PREFIX
-echo "Formatting namenode"
-./bin/hadoop namenode -format
-echo "Starting Hadoop"
-mkdir -p "${CLOUD_INSTALL_HOME}/hdfs/namesecondary" #unsure why this doesn't run
-./bin/start-all.sh
-echo "Waiting 30 seconds for HDFS to come out of safe mode"
-sleep 30
+format_namenode() {
+  cd $HADOOP_PREFIX
+  echo "Formatting namenode"
+  ./bin/hadoop namenode -format
+}
 
-# start zookeeper
-cd $ZOOKEEPER_HOME
-mkdir -p "${CLOUD_INSTALL_HOME}/zk-data" #how can I pass this in?
-echo "Starting Zookeeper"
-./bin/zkServer.sh start
+start_hadoop() {
+  echo "Starting Hadoop"
+  mkdir -p "${CLOUD_INSTALL_HOME}/hdfs/namesecondary" #unsure why this doesn't get created
+  ./bin/start-all.sh
+  echo "Waiting for hadoop to come out of safeMode"
+  ./bin/hadoop dfsadmin -safemode wait
+}
 
-# setup and start accumulo
-# how can I pass in the instancename, password and username?
-cd $ACCUMULO_HOME
-echo "Initing Accumulo as root@accumulo, password is secret"
-./bin/accumulo init --clear-instance-name --instance-name accumulo --password secret --username root
-echo "Starting Accumulo"
-./bin/start-all.sh
+start_zookeeper() {
+  cd $ZOOKEEPER_HOME
+  mkdir -p "${CLOUD_INSTALL_HOME}/zk-data" #how can I pass this in?
+  echo "Starting Zookeeper"
+  ./bin/zkServer.sh start
+}
 
-echo "Accumulo is now running from ${CLOUD_INSTALL_HOME}"
-echo -e "You should run \n  source ${CLOUD_INSTALL_HOME}/bin/cloud-env\n and get to work.  The monitor page should be available at http://localhost:50095"
+init_accumulo() {
+  # how can I pass in the instancename, password and username?
+  cd $ACCUMULO_HOME
+  echo "Initing Accumulo as root@accumulo, password is secret"
+  ./bin/accumulo init --clear-instance-name --instance-name accumulo --password secret --username root
+}
+
+start_accumulo() {
+   echo "Starting Accumulo"
+  ./bin/start-all.sh
+}
+
+finish() {
+  echo "Accumulo is now running from ${CLOUD_INSTALL_HOME}"
+  echo -e "You should run \n  source ${CLOUD_INSTALL_HOME}/bin/cloud-env\n and get to work.  The monitor page should be available at http://localhost:50095"
+  # make this script unexecutable
+  chmod 644 "$(_script_dir)/$(basename $0)"
+}
+
+format_namenode && start_hadoop && start_zookeeper && init_accumulo && start_accumulo && finish

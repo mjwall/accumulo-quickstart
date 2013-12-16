@@ -14,8 +14,9 @@ autoScalaLibrary := false
 
 libraryDependencies ++= Seq(
   // hadoop and zookeeper dists are not in a maven repo :(
-  "org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
-  "org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
+  "org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/Hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
+  //"org.apache.hadoop" % "hadoop" % "1.2.1" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1.tar.gz")))),
+"org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
   // accumulo dist is :)
   "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
  )
@@ -91,29 +92,9 @@ extractDependencies := {
   }
 }
 
-val copyConfigs = taskKey[Boolean]("Copies src/main/resources into installPath")
+val _getHomePaths = taskKey[HashMap[String,String]]("Returns hashmap of home directories in installPath")
 
-copyConfigs := {
-  if (new File(installPath.value, "bin").exists) {
-    println(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
-    false
-  } else {
-    val configDir = new File("src/main/resources")
-    println(s"Copying configs from ${configDir} to ${installPath.value}")
-    sbt.IO.copyDirectory(configDir, installPath.value, true, true)
-    // set bin files to executable
-    val binDir = s"${installPath.value}${java.io.File.separator}bin"
-    for(binFile <- new File(binDir).listFiles) {
-      // use a map here
-      binFile.setExecutable(true, false)
-    }
-    true
-  }
-}
-
-val getHomePaths = taskKey[HashMap[String,String]]("Returns hashmap of home directories in installPath")
-
-getHomePaths := {
+_getHomePaths := {
   val rootPath = installPath.value
   var homes = HashMap[String, String]()
   homes += "quickstart" -> rootPath.getAbsolutePath
@@ -132,52 +113,11 @@ getHomePaths := {
   homes
 }
 
-val replacePathsInConfigs = taskKey[Boolean]("Replaces Paths in config files")
+val _getReplaceValues = taskKey[HashMap[String,String]]("Get hashmap of strings to replace")
 
-replacePathsInConfigs := {
-  // TODO: think about 2 config directory, one that needs replacement and one that doesn't
-  // cd src/main/resources && grep -rl REPLACE .
-  // ./accumulo-1.5.0/conf/accumulo-env.sh
-  // ./bin/cloud-env
-  // ./hadoop-1.0.4/conf/hadoop-env.sh
-  // ./hadoop-1.0.4/conf/hdfs-site.xml
-  // ./hadoop-1.0.4/conf/mapred-site.xml
-  // ./zookeeper-3.3.6/conf/zoo.cfg
-  val rootPath = installPath.value
-  val files = List(
-    new File(rootPath, "bin/cloud-env"),
-    new File(rootPath, "hadoop-1.0.4/conf/hadoop-env.sh"),
-    new File(rootPath, "hadoop-1.0.4/conf/hdfs-site.xml"),
-    new File(rootPath, "hadoop-1.0.4/conf/mapred-site.xml"),
-    new File(rootPath, "zookeeper-3.3.6/conf/zoo.cfg"),
-    new File(rootPath, "accumulo-1.5.0/conf/accumulo-env.sh")
-  )
-  val replacements = getReplaceValues.value
-  for(f <- files) {
-    val filename = f.getAbsolutePath
-    println(s"replacing in ${f}")
-    // read file in to string
-    val source = scala.io.Source.fromFile(filename)
-    var inString = source.mkString
-    source.close()
-    // replace
-    replacements.foreach{
-      case (key,value) => inString = inString.replaceAll(key, value)
-    }
-    // write file out
-    f.delete
-    val newFile = new java.io.FileWriter(filename, false)
-    newFile.write(inString)
-    newFile.close
-  }
-  true
-}
-
-val getReplaceValues = taskKey[HashMap[String,String]]("Get hashmap of strings to replace")
-
-getReplaceValues := {
+_getReplaceValues := {
   val replacements = HashMap[String,String]()
-  val homePath = getHomePaths.value
+  val homePath = _getHomePaths.value
   val rootPath = installPath.value.getAbsolutePath
   replacements += "REPLACE_JAVA_HOME" -> getJavaHome.value
   replacements += "REPLACE_CLOUD_INSTALL_HOME" -> rootPath
@@ -190,14 +130,87 @@ getReplaceValues := {
   replacements
 }
 
+val copyConfigs = taskKey[Boolean]("Copies src/main/resources into installPath")
+
+copyConfigs := {
+  if (new File(installPath.value, "bin").exists) {
+    println(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
+    false
+  } else {
+    val slash = java.io.File.separator
+    val appHomes = _getHomePaths.value
+    //
+    // copy the Accumulo sample configs
+    val accumuloHome = appHomes("accumulo")
+    val accumuloConf = new File(s"${accumuloHome}${slash}conf")
+    val accumuloExampleConf = new File(s"${accumuloConf.getAbsolutePath}${slash}examples${slash}2GB${slash}standalone")
+    println(s"Copying example accumulo configs from ${accumuloExampleConf} to ${accumuloConf}")
+    sbt.IO.copyDirectory(accumuloExampleConf, accumuloConf, true, true)
+    //
+    // copy configs that match directories we just unzipped, doing replacement
+    val replacements = _getReplaceValues.value
+    def overwriteAndReplace(inFile: File, outFile: File) {
+        println(s"Copying ${inFile} to ${outFile} and replacing REPLACE_ strings")
+        val source = scala.io.Source.fromFile(inFile)
+        var inString = source.mkString
+        source.close()
+        // replace
+        replacements.foreach{
+          case (key,value) => inString = inString.replaceAll(key, value)
+        }
+        // write file out
+        val newFile = new java.io.FileWriter(outFile, false)
+        newFile.write(inString)
+        newFile.close
+    }
+    def copyAppConfigs(appHome: String) {
+      val baseDir = new File(appHome).getName
+      val templateDir = new File(s"${baseDirectory.value}${slash}src${slash}main${slash}resources${slash}${baseDir}")
+      val destDir = new File(s"${appHome}")
+      for(subDir <- templateDir.listFiles) {
+        if (subDir.isDirectory) {
+          for (filename <- subDir.listFiles) {
+            // read file, do replacement, write out
+            val outFileName = s"${destDir}${slash}${subDir.getName}${slash}${filename.getName}"
+            val outFile = new File(outFileName)
+            overwriteAndReplace(filename, outFile)
+          }
+        } else {
+          println(s"Unexpected file: ${subDir}")
+        }
+      }
+    }
+    copyAppConfigs(appHomes("hadoop"))
+    copyAppConfigs(appHomes("zookeeper"))
+    copyAppConfigs(appHomes("accumulo"))
+    //
+    // copy root bin directory
+    val binTemplateDir = new File(s"${baseDirectory.value}${slash}src${slash}main${slash}resources${slash}bin")
+    val binDestDir = new File(s"${installPath.value}${slash}bin")
+    println(s"Copying bin from ${binTemplateDir}  to ${binDestDir}")
+    sbt.IO.copyDirectory(binTemplateDir, binDestDir, true, true)
+    //
+    // replace cloud-env REPLACE strings
+    val cloudEnvFile = new File(binDestDir, "cloud-env")
+    overwriteAndReplace(cloudEnvFile, cloudEnvFile)
+    //
+    // set all bin directory files executable
+    for(binFile <- binDestDir.listFiles) {
+      // use a map here
+      binFile.setExecutable(true, false)
+    }
+    true
+  }
+}
+
+
 val initAndStart = taskKey[Unit]("format namenode, start hadoop, start zookeeper, init and start accumulo")
 
 initAndStart := {
-  Seq(s"${installPath.value}/bin/init-and-start.sh")!!
+  Seq(s"${installPath.value}/bin/init-and-start.sh")!
 }
 
-addCommandAlias("install", ";extractDependencies;copyConfigs;replacePathsInConfigs;initAndStart")
-//addCommandAlias("install", ";extractDependencies;copyConfigs;replacePathsInConfigs")
+addCommandAlias("install", ";extractDependencies;copyConfigs;initAndStart")
 
 // check ssh and java
 
