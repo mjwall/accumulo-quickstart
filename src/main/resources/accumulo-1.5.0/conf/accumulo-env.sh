@@ -56,7 +56,7 @@ export ACCUMULO_LOG_HOST=`(grep -v '^#' $ACCUMULO_HOME/conf/monitor ; echo local
 
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
-  export ACCUMULO_OTHER_OPTS="${ACCUMULO_OTHER_OPTS} -Djava.security.krb5.realm=OX.AC.UK -Djava.security.krb5.kdc=kdc0.ox.ac.uk:kdc1.ox.ac.uk"
+  export ACCUMULO_OTHER_OPTS="${ACCUMULO_OTHER_OPTS} -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
   # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
   export ACCUMULO_OTHER_OPTS="${ACCUMULO_OTHER_OPTS} -Dapple.awt.UIElement=true"
   export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Dapple.awt.UIElement=true"
