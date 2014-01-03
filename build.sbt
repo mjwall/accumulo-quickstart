@@ -44,12 +44,6 @@ removeInstallPath := {
   }
 }
 
-val checkSSH = taskKey[Boolean]("Check ssh on your box")
-
-checkSSH := {
-  SSHWrapper.checkLocalhost
-}
-
 val checkJavaHome = taskKey[Boolean]("Check that JAVA_HOME is set")
 
 checkJavaHome := {
@@ -212,8 +206,6 @@ initAndStart := {
 
 addCommandAlias("install", ";extractDependencies;copyConfigs;initAndStart")
 
-// check ssh and java
-
 // get tar.gz files
 
 // extract tar.gz files
@@ -222,10 +214,16 @@ addCommandAlias("install", ";extractDependencies;copyConfigs;initAndStart")
 
 // filter configs replacing home directories
 
-// start hadoop and format
+// run init and start script which will
 
-// start zookeeper
+  // check for running hadoop etc
 
-// start accumulo
+  // check that ssh works without a password
 
-// print message
+  // start hadoop and format
+
+  // start zookeeper
+
+  // start accumulo
+
+  // print message

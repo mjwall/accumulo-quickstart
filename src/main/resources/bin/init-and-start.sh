@@ -29,6 +29,27 @@ check_running() {
   return $ret
 }
 
+_ssh() {
+    # this function sets publickey as the only authentication, which is
+    # the passwordless way Hadoop communicates in psuedo distributed mode
+    echo $(ssh -o 'PreferredAuthentications=publickey' localhost "hostname")
+}
+
+check_ssh() {
+  # check ssh localhost
+  echo "Checking passwordless SSH (for Hadoop)"
+  local ret=0
+  local HOSTNAME=$(hostname)
+  local SSH_HOST=$(_ssh)
+  if [[ "${HOSTNAME}" == "${SSH_HOST}" ]]; then
+    echo "SSH appears good"
+  else
+    echo "Problem with SSH, ran ssh -o 'PreferredAuthentications=publickey' localhost \"hostname\". Expected ${HOSTNAME}, but got ${SSH_HOST}. Please see http://hadoop.apache.org/common/docs/r0.20.2/quickstart.html#Setup+passphraseless.  Once ssh without a password is working, execute './bin/sbt initAndStart' to finish the install"
+    ret=1
+  fi
+  return $ret
+}
+
 format_namenode() {
   cd $HADOOP_PREFIX
   echo "Formatting namenode"
@@ -40,7 +61,13 @@ start_hadoop() {
   mkdir -p "${CLOUD_INSTALL_HOME}/hdfs/namesecondary" #unsure why this doesn't get created
   ./bin/start-all.sh
   echo "Waiting for hadoop to come out of safeMode"
-  ./bin/hadoop dfsadmin -safemode wait
+  local x=0
+  while [ $x -lt 5 ]
+  do
+    # try 2 times, for slow computers
+    ./bin/hadoop dfsadmin -safemode wait && x=5
+    x=$(( $x + 1 ))
+  done
 }
 
 start_zookeeper() {
@@ -69,4 +96,4 @@ finish() {
   chmod 644 "$(_script_dir)/$(basename $0)"
 }
 
-check_running && format_namenode && start_hadoop && start_zookeeper && init_accumulo && start_accumulo && finish
+check_running && check_ssh && format_namenode && start_hadoop && start_zookeeper && init_accumulo && start_accumulo && finish
