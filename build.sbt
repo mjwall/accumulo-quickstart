@@ -44,15 +44,17 @@ removeInstallPath := {
   }
 }
 
-val checkJavaHome = taskKey[Boolean]("Check that JAVA_HOME is set")
+val ensureJavaHome = taskKey[Boolean]("Check that JAVA_HOME is set")
 
-checkJavaHome := {
+ensureJavaHome := {
   // todo, better scala check for null.  Not sure this can be
   // since we are running scala
-  if (null == getJavaHome) {
+  println(s"JAVA_HOME = ${getJavaHome.value}")
+  if (null == getJavaHome.value) {
     false
+  } else {
+    true
   }
-  true
 }
 
 val getJavaHome = taskKey[String]("Get the configured JAVA_HOME")
@@ -61,7 +63,7 @@ getJavaHome := {
   System.getenv("JAVA_HOME")
 }
 
-val extractDependencies = taskKey[Boolean]("Extract accumulo and related packages into installPath")
+val extractDependencies = taskKey[Unit]("Extract accumulo and related packages into installPath")
 
 extractDependencies := {
   val dest = installPath.value
@@ -69,9 +71,10 @@ extractDependencies := {
     println(s"Extracting ${file.getName} to ${dest.getName}")
     Unpack.gunzipTar(file, dest)
   }
-  if (dest.exists) {
-    println(s"Install path ${dest} exists, try running removeInstallPath")
-    false
+  if (! ensureJavaHome.value) {
+    throw new RuntimeException("JAVA_HOME not set")
+  } else if (dest.exists) {
+    throw new RuntimeException(s"Install path ${dest} exists, try running removeInstallPath")
   } else {
     sbt.IO.createDirectory(dest)
     Build.data((dependencyClasspath in Runtime).value).map ( f =>
@@ -82,7 +85,6 @@ extractDependencies := {
         case name => None //do nothing
       }
     )
-    true
   }
 }
 
@@ -103,6 +105,8 @@ _getHomePaths := {
         }
       }
     }
+  } else {
+    throw new RuntimeException(s"Install path ${rootPath} doesn't exist")
   }
   homes
 }
@@ -111,25 +115,28 @@ val _getReplaceValues = taskKey[HashMap[String,String]]("Get hashmap of strings 
 
 _getReplaceValues := {
   val replacements = HashMap[String,String]()
-  val homePath = _getHomePaths.value
+  val homePaths = _getHomePaths.value
   val rootPath = installPath.value.getAbsolutePath
-  replacements += "REPLACE_JAVA_HOME" -> getJavaHome.value
-  replacements += "REPLACE_CLOUD_INSTALL_HOME" -> rootPath
-  replacements += "REPLACE_HADOOP_PREFIX" -> homePath("hadoop")
-  replacements += "REPLACE_ZOOKEEPER_HOME" -> homePath("zookeeper")
-  replacements += "REPLACE_ACCUMULO_HOME" -> homePath("accumulo")
-  replacements += "REPLACE_HDFS_PATH" -> s"${rootPath}${java.io.File.separator}hdfs"
-  replacements += "REPLACE_MAPRED_PATH" -> s"${rootPath}${java.io.File.separator}mapred"
-  replacements += "REPLACE_ZOOKEEPER_DATADIR" -> s"${rootPath}${java.io.File.separator}zk-data"
+  if (homePaths.size > 0) {
+    replacements += "REPLACE_JAVA_HOME" -> getJavaHome.value
+    replacements += "REPLACE_CLOUD_INSTALL_HOME" -> rootPath
+    replacements += "REPLACE_HADOOP_PREFIX" -> homePaths("hadoop")
+    replacements += "REPLACE_ZOOKEEPER_HOME" -> homePaths("zookeeper")
+    replacements += "REPLACE_ACCUMULO_HOME" -> homePaths("accumulo")
+    replacements += "REPLACE_HDFS_PATH" -> s"${rootPath}${java.io.File.separator}hdfs"
+    replacements += "REPLACE_MAPRED_PATH" -> s"${rootPath}${java.io.File.separator}mapred"
+    replacements += "REPLACE_ZOOKEEPER_DATADIR" -> s"${rootPath}${java.io.File.separator}zk-data"
+  }
   replacements
 }
 
-val copyConfigs = taskKey[Boolean]("Copies src/main/resources into installPath")
+val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
 
 copyConfigs := {
-  if (new File(installPath.value, "bin").exists) {
-    println(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
-    false
+  println("Copying configs mike")
+  val rootPath = installPath.value
+  if (new File(rootPath, "bin").exists) {
+    throw new RuntimeException(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
   } else {
     val slash = java.io.File.separator
     val appHomes = _getHomePaths.value
@@ -193,10 +200,8 @@ copyConfigs := {
       // use a map here
       binFile.setExecutable(true, false)
     }
-    true
   }
 }
-
 
 val initAndStart = taskKey[Unit]("format namenode, start hadoop, start zookeeper, init and start accumulo")
 
@@ -205,25 +210,3 @@ initAndStart := {
 }
 
 addCommandAlias("install", ";extractDependencies;copyConfigs;initAndStart")
-
-// get tar.gz files
-
-// extract tar.gz files
-
-// copy custom configs
-
-// filter configs replacing home directories
-
-// run init and start script which will
-
-  // check for running hadoop etc
-
-  // check that ssh works without a password
-
-  // start hadoop and format
-
-  // start zookeeper
-
-  // start accumulo
-
-  // print message
