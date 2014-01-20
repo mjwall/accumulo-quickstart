@@ -1,10 +1,10 @@
 language : c #not really, but don't need anything else setup
 
+before_install :
+  - bin/travis-ssh.sh
+
 install :
   - make install
-
-before_script :
-  - bin/travis-ssh.sh
 
 script :
   - make test
