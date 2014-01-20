@@ -12,11 +12,13 @@ EOC
 
 OUTPUT=$($ACCUMULO_HOME/bin/accumulo shell -u root -p secret -e "$CMDS")
 
+echo "OUTPUT"
 echo "${OUTPUT}"
+echo ""
 
 read -d '' EXPECTED <<EOE
 a b:c []    d
-Table: [test1] has been deleted.DELETEME
+Table: [test1] has been deleted.
 EOE
 
 # extra space after actual output
