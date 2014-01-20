@@ -1,11 +1,15 @@
-# Accumulo Quickstart
+# Accumulo Quickstart Description
 
-## Description
+[![Build Status](https://travis-ci.org/mjwall/accumulo-quickstart.png?branch=master)](https://travis-ci.org/mjwall/accumulo-quickstart)
+
+## Quickstart
 
 This script is designed to help you get setup with a local Accumulo
-one node development environment.  It is not intended for production installations.  The script will install the following into one directory, configure them for you and start them up:
+one node development environment.  It is not intended for production
+installations.  The script will install the following into one
+directory, configure them for you and start them up:
 
-- Hadoop 1.0.4
+- Hadoop 1.2.1
 - Zookeeper 3.3.6
 - Accumulo 1.5.0
 
@@ -16,7 +20,11 @@ Accumulo Book, http://shop.oreilly.com/product/0636920032304.do
 
 ## Installation
 
-To run this script, clone the repo and run the following from the root directory.
+To use this package, first clone the repo with
+
+    git clone https://github.com/mjwall/accumulo-quickstart.git
+
+Then run the following from the root directory.
 
     ./bin/install
 
@@ -29,15 +37,18 @@ bin directory.
 
 ##  Prerequisites
 
-This script use SBT version 0.13.0, but a copy is included so you only
-need Java >= 1.6. You will also need password-less SSH setup.  There
-are many articles on how to do this, including
-http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/.
+This project only requires Java >= 1.6 be installed.  You will also
+need password-less SSH setup.  There are many articles on how to do
+this, including http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/
+
+SBT and Scala is used to download the files and setup the configs.
+However, a copy of SBT version 0.13.0 is included, so you should not
+need to do anything beside clone the repo and run ./bin/install.
 
 This is has not been tested on Windows.  I am unsure if Hadoop and
 Accumulo will even run on Windows, so I didn't worry with it.  I did
 work hard to not use Unix specific stuff except in the last step where
-the namenode is formatted and Accumulo is init'd.
+the namenode is formatted and Accumulo is init'd with a shell script.
 
 ## Usage
 
@@ -46,7 +57,7 @@ usage is to call executables in their respective bin directories.
 That will still work with this installation.
 
 This package also creates a set of helpers under the top level bin
-directory.  To use these, source the cloud-env script in that
+directory.  To use these, source the cloud-env script in the install-home/bin
 directory to setup some path.  Doing so will put the following on your path.
 
 cloud-helpers
@@ -75,3 +86,13 @@ accumulo helpers
     acc-start-all      - start accumulo, call ACCUMULO_HOME/bin/start-all.sh
     acc-stop-all       - stop accumulo
     accumulo           - the accumulo script
+
+## Cleanup
+
+Everything used by Hadoop, Zookeeper and Accumulo should be located in
+the install-home directory.  If should be able to run `stop-all` and
+simply remove that directory.
+
+## Problems
+
+If you run into issues, please create a ticket on github.  Feedback is appreciated.
