@@ -1,3 +1,13 @@
-install : "make install"
-script : "make test"
-after_script : "make stop clean"
+language : c #not really, but don't need anything else setup
+
+install :
+  - make install
+
+before_script :
+  - bin/travis-ssh.sh
+
+script :
+  - make test
+
+after_script :
+  - make stop clean
