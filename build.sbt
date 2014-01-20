@@ -134,7 +134,6 @@ _getReplaceValues := {
 val copyConfigs = taskKey[Unit]("Copies src/main/resources into installPath")
 
 copyConfigs := {
-  println("Copying configs mike")
   val rootPath = installPath.value
   if (new File(rootPath, "bin").exists) {
     throw new RuntimeException(s"Looks like copyConfigs has already run, try running removeInstallPath to clean up everything")
