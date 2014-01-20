@@ -14,9 +14,12 @@ directory, configure them for you and start them up:
 - Accumulo 1.5.0
 
 My intent is to provide an easy way for those interested in
-Accumulo to get started without having to know how much about how
+Accumulo to get started without having to know much about how
 Hadoop, Zookeeper or Accumulo work.  I do plan to use it in our
 Accumulo Book, http://shop.oreilly.com/product/0636920032304.do
+
+I considered using the MiniAccumuloCluster, but in the end felt it
+would more useful for new users to have full installs of everything.
 
 ## Installation
 
@@ -43,10 +46,17 @@ this, including http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-l
 
 SBT and Scala is used to download the files and setup the configs.
 However, a copy of SBT version 0.13.0 is included, so you should not
-need to do anything beside clone the repo and run ./bin/install.
+need to do anything beside clone the repo and run `./bin/install`.
 
-This is has not been tested on Windows.  I am unsure if Hadoop and
-Accumulo will even run on Windows, so I didn't worry with it.  I did
+While not required, you may run into warning like this.
+
+    WARN : Max files open on localhost is 64000, recommend 65536
+
+There are many articles online about how to update this.  I am running on a Mac and
+used the following, https://coderwall.com/p/lfjoaq
+
+This project has not been tested on Windows.  I am unsure if Hadoop and
+Accumulo will even run on Windows, so I didn't spend much time on it.  I did
 work hard to not use Unix specific stuff except in the last step where
 the namenode is formatted and Accumulo is init'd with a shell script.
 
