@@ -126,6 +126,7 @@ _getReplaceValues := {
     replacements += "REPLACE_HDFS_PATH" -> s"${rootPath}${java.io.File.separator}hdfs"
     replacements += "REPLACE_MAPRED_PATH" -> s"${rootPath}${java.io.File.separator}mapred"
     replacements += "REPLACE_ZOOKEEPER_DATADIR" -> s"${rootPath}${java.io.File.separator}zk-data"
+    replacements += "<value>DEFAULT</value>" -> "<value>QUICKSTARTS_RULE</value>" // instance.secret
   }
   replacements
 }
@@ -194,7 +195,9 @@ copyConfigs := {
     // replace cloud-env REPLACE strings
     val cloudEnvFile = new File(binDestDir, "cloud-env")
     overwriteAndReplace(cloudEnvFile, cloudEnvFile)
-    //
+    // replace instance.secret in accumulo-site.xml
+    val accumuloSiteFile = new File(s"${accumuloHome}${slash}conf${slash}accumulo-site.xml")
+    overwriteAndReplace(accumuloSiteFile, accumuloSiteFile)
     // set all bin directory files executable
     for(binFile <- binDestDir.listFiles) {
       // use a map here
