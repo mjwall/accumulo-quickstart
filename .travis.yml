@@ -1,7 +1,8 @@
 language : c #not really, but don't need anything else setup
 
 before_install :
-  - bin/travis-ssh.sh
+  - quickinstall/bin/travis-ssh.sh && cd quickinstall
+
 
 install :
   - make install
