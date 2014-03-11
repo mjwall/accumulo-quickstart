@@ -79,7 +79,7 @@
                     <argument>-classpath</argument>
                     <classpath />
                     <argument>-Daccumulo.version=${accumulo.version}</argument>
-                    <argument>instamo.ShellExample</argument>
+                    <argument>com.mjwall.quickstart.ShellExample</argument>
                 </arguments>
               </configuration>
           </plugin>
