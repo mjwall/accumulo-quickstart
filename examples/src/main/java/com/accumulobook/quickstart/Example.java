@@ -1,4 +1,4 @@
-package com.mjwall.quickstart;
+package com.accumulobook.quickstart;
 
 import java.util.HashMap;
 import java.util.List;

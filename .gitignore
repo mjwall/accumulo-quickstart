@@ -1,2 +1,5 @@
 quickinstall/install-home/
 target/
+.classpath
+.project
+.settings/

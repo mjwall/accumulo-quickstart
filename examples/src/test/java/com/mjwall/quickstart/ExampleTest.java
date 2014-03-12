@@ -17,6 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.accumulobook.quickstart.Example;
+
 public class ExampleTest {
 
     private static MiniAccumuloCluster accumulo;
