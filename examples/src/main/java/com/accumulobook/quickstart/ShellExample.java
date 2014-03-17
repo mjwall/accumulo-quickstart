@@ -23,6 +23,8 @@ public class ShellExample implements Runnable {
 
       mac = new MiniAccumuloCluster(tempDir, PASSWORD);
       System.out.println("Starting the MiniAccumuloCluster in " + tempDir.getAbsolutePath());
+      System.out.println("Zookeeper is " + mac.getZooKeepers());
+      System.out.println("Instance is " + mac.getInstanceName());
       mac.start();
 
       String[] args = new String[] {"-u", "root", "-p", PASSWORD, "-z",
@@ -34,6 +36,9 @@ public class ShellExample implements Runnable {
       System.err.println("Error starting MiniAccumuloCluster: " + e.getMessage());
       System.exit(1);
     } finally {
+        if (null != tempDir) {
+            tempDir.delete();
+        }
         if (null != mac) {
             try {
                 mac.stop();

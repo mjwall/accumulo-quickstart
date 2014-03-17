@@ -14,7 +14,14 @@
     <hadoop-two.version>2.3.0</hadoop-two.version>
     <zookeeper.version>3.3.6</zookeeper.version>
     <commons.cli.version>1.2</commons.cli.version>
-    <maclass>com.accumulobook.quickstart.MapReduceExample</maclass>
+    <!-- Properties for running -->
+    <table.name>table2</table.name>
+    <instance.name>accumulo</instance.name>
+    <zookeeper.location>localhost:2181</zookeeper.location>
+    <root.user>root</root.user>
+    <root.password>pass1234</root.password>
+    <row>SCAN_ALL</row> <!-- place holder so mvn profiles will run -->
+    <auths>SCAN_ALL</auths> <!-- place holder so mvn profiles will run -->
   </properties>
 
   <profiles>
@@ -71,27 +78,152 @@
       </build>
     </profile>
     <profile>
-      <id>mapreduce</id>
+      <id>java:create</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>1.2.1</version>
-            <configuration>
-              <executable>java</executable>
-              <arguments>
-                <argument>-classpath</argument>
-                <classpath />
-                <argument>-Daccumulo.version=${accumulo.version}</argument>
-                <argument>${maclass}</argument>
-              </arguments>
-            </configuration>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.2.1</version>
+              <configuration>
+                <executable>java</executable>
+                <arguments>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>-Daccumulo.version=${accumulo.version}</argument>
+                    <argument>com.accumulobook.quickstart.JavaExample</argument>
+                    <argument>-p</argument>
+                    <argument>${root.password}</argument>
+                    <argument>-u</argument>
+                    <argument>${root.user}</argument>
+                    <argument>-i</argument>
+                    <argument>${instance.name}</argument>
+                    <argument>-z</argument>
+                    <argument>${zookeeper.location}</argument>
+                    <argument>create</argument>
+                    <argument>-t</argument>
+                    <argument>${table.name}</argument>
+                </arguments>
+              </configuration>
           </plugin>
         </plugins>
       </build>
     </profile>
-  </profiles>
+    <profile>
+      <id>java:insert</id>
+      <build>
+        <plugins>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.2.1</version>
+              <configuration>
+                <executable>java</executable>
+                <arguments>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>-Daccumulo.version=${accumulo.version}</argument>
+                    <argument>com.accumulobook.quickstart.JavaExample</argument>
+                    <argument>-p</argument>
+                    <argument>${root.password}</argument>
+                    <argument>-u</argument>
+                    <argument>${root.user}</argument>
+                    <argument>-i</argument>
+                    <argument>${instance.name}</argument>
+                    <argument>-z</argument>
+                    <argument>${zookeeper.location}</argument>
+                    <argument>insert</argument>
+                    <argument>-t</argument>
+                    <argument>${table.name}</argument>
+                    <argument>-r</argument>
+                    <argument>${row.id}</argument>
+                    <argument>-cf</argument>
+                    <argument>${column.family}</argument>
+                    <argument>-cq</argument>
+                    <argument>${column.qualifier}</argument>
+                    <argument>-ts</argument>
+                    <argument>${timestamp}</argument>
+                    <argument>-a</argument>
+                    <argument>${auths}</argument>
+                    <argument>-val</argument>
+                    <argument>${value}</argument>
+                  </arguments>
+              </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>java:scan</id>
+      <build>
+        <plugins>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.2.1</version>
+              <configuration>
+                <executable>java</executable>
+                <arguments>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>-Daccumulo.version=${accumulo.version}</argument>
+                    <argument>com.accumulobook.quickstart.JavaExample</argument>
+                    <argument>-p</argument>
+                    <argument>${root.password}</argument>
+                    <argument>-u</argument>
+                    <argument>${root.user}</argument>
+                    <argument>-i</argument>
+                    <argument>${instance.name}</argument>
+                    <argument>-z</argument>
+                    <argument>${zookeeper.location}</argument>
+                    <argument>scan</argument>
+                    <argument>-t</argument>
+                    <argument>${table.name}</argument>
+                    <argument>-r</argument>
+                    <argument>${row}</argument>
+                    <argument>-a</argument>
+                    <argument>${auths}</argument>
+                  </arguments>
+              </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>java:grep</id>
+      <build>
+        <plugins>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.2.1</version>
+              <configuration>
+                <executable>java</executable>
+                <arguments>
+                    <argument>-classpath</argument>
+                    <classpath />
+                    <argument>-Daccumulo.version=${accumulo.version}</argument>
+                    <argument>com.accumulobook.quickstart.JavaExample</argument>
+                    <argument>-p</argument>
+                    <argument>${root.password}</argument>
+                    <argument>-u</argument>
+                    <argument>${root.user}</argument>
+                    <argument>-i</argument>
+                    <argument>${instance.name}</argument>
+                    <argument>-z</argument>
+                    <argument>${zookeeper.location}</argument>
+                    <argument>grep</argument>
+                    <argument>-t</argument>
+                    <argument>${table.name}</argument>
+                    <argument>--term</argument>
+                    <argument>${term}</argument>
+                  </arguments>
+              </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    </profiles>
 
   <dependencies>
     <dependency>
@@ -200,6 +332,11 @@
       <version>14.0.1</version>
     </dependency>
      -->
+     <dependency>
+    <groupId>com.beust</groupId>
+    <artifactId>jcommander</artifactId>
+    <version>1.35</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
