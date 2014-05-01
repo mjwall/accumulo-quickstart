@@ -1,4 +1,4 @@
-package com.mjwall.quickstart;
+package com.accumulobook.quickstart;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
