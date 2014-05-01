@@ -25,9 +25,9 @@ would more useful for new users to have full installs of everything.
 
 To use this package, first clone the repo with
 
-    git clone https://github.com/mjwall/accumulo-quickstart.git
+    git clone https://github.com/accumulobook/accumulo-quickstart.git
 
-Then run the following from the root directory.
+Then cd to to the quickinstall directory and run the following.
 
     ./bin/install
 

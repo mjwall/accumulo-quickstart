@@ -1,6 +1,6 @@
 import scala.collection.mutable.HashMap
 
-organization := "com.mjwall"
+organization := "com.accumulobook"
 
 name := "accumulo-quickstart"
 
