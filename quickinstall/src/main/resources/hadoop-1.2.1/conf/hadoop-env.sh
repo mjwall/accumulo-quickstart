@@ -22,6 +22,8 @@ export HADOOP_PREFIX=REPLACE_HADOOP_PREFIX
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
   export HADOOP_OPTS="${HADOOP_OPTS} -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
+  # same fix, but for java 7, see
+  export HADOOP_OPTS="${HADOOP_OPTS} -Djava.security.krb5.config=/dev/null"
   # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
   export HADOOP_OPTS="${HADOOP_OPTS} -Dapple.awt.UIElement=true"
 fi
