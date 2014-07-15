@@ -15,10 +15,10 @@ autoScalaLibrary := false
 libraryDependencies ++= Seq(
   // hadoop and zookeeper dists are not in a maven repo :(
   //"org.apache.hadoop" % "hadoop" % "1.0.4" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/Hadoop-1.0.4/hadoop-1.0.4.tar.gz")))),
-  "org.apache.hadoop" % "hadoop" % "1.2.1" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1.tar.gz")))),
+  "org.apache.hadoop" % "hadoop" % "2.4.1" artifacts(Artifact("hadoop","jar","tar.gz",None, Nil, Some(new URL("http://archive.apache.org/dist/hadoop/core/hadoop-2.4.1/hadoop-2.4.1.tar.gz")))),
 "org.apache.zookeeper" % "zookeeper" % "3.3.6" artifacts(Artifact("zookeeper", "jar", "tar.gz", None, Nil, Some(new URL("http://archive.apache.org/dist/zookeeper/zookeeper-3.3.6/zookeeper-3.3.6.tar.gz")))) intransitive(), // picked up dependencies somehow
   // accumulo dist is :)
-  "org.apache.accumulo" % "accumulo" % "1.5.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
+  "org.apache.accumulo" % "accumulo" % "1.6.0" artifacts(Artifact("accumulo", "jar", "tar.gz", "bin")) intransitive()
  )
 
 val installPath = taskKey[File]("Directory for install of accumulo and related packages.")
