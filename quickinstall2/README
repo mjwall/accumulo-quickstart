@@ -1,0 +1,7 @@
+AccumuloBook QuickInstall
+
+This project can be used to create a tar.gz that includes Accumulo and all dependencies ready to run in a standalone mode.  The only requirements are Maven 3.x and Java 1.7.
+
+Users can also download the distribution, unpack it somewhere and go.
+
+TODO: write more

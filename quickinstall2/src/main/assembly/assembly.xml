@@ -1,0 +1,17 @@
+<assembly>
+  <id>bundle</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${quickinstall.location}</directory>
+      <outputDirectory>quickinstall-home</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/resources</directory>
+      <outputDirectory>quickinstall-home</outputDirectory>
+    </fileSet>
+  </fileSets>
+</assembly>
