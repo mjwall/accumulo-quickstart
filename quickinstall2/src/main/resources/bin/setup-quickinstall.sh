@@ -60,8 +60,8 @@ check_ssh() {
   return $ret
 }
 
-replace_hadoop_conf() {
-  echo "Replacing hadoop conf variables"
+setup_hadoop_conf() {
+  echo "Setting up Hadoop conf"
   HADOOP_HOME="${QI_HOME}/hadoop-2.4.1"
   sed -i '' -e "s|QI_HADOOP_HOME|${HADOOP_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
   sed -i '' -e "s|QI_JAVA_HOME|${JAVA_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
@@ -69,11 +69,10 @@ replace_hadoop_conf() {
   mkdir -p ${HDFS_DIR}/name
   mkdir -p ${HDFS_DIR}/data
   sed -i '' -e "s|QI_HDFS_DIR|${HDFS_DIR}|g" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+  export HADOOP_HOME
 }
 
 format_namenode() {
-  cd $HADOOP_HOME
-  export HADOOP_HOME
   echo "Formatting namenode"
   ${HADOOP_HOME}/bin/hdfs namenode -format
 }
@@ -93,12 +92,23 @@ start_hadoop() {
   ${HADOOP_HOME}/sbin/start-yarn.sh
 }
 
-replace_zookeeper_conf() {
-  echo "Replacing zookeeper conf variables"
+setup_zookeeper_conf() {
+  echo "Setting up Zookeeper conf"
+  ZOOKEEPER_HOME="${QI_HOME}/zookeeper-3.4.6"
+  sed -i '' -e "s|QI_ZOOKEEPER_HOME|${ZOOKEEPER_HOME}|" ${ZOOKEEPER_HOME}/bin/zkEnv.sh
+  ZOO_DATA="${QI_HOME}/zk-data"
+  mkdir -p ${ZOO_DATA}
+  sed -i '' -e "s|QI_ZOO_DATA|${ZOO_DATA}|" ${ZOOKEEPER_HOME}/conf/zoo.cfg
+  export ZOOKEEPER_HOME
 }
 
-replace_accumulo_conf() {
-  echo "Replacing accumulo conf variables"
+start_zookeeper() {
+  echo "Starting Zookeeper"
+  $ZOOKEEPER_HOME/bin/zkServer.sh start
+}
+
+setup_accumulo_conf() {
+  echo "Replacing accumulo conf"
 }
 
 create_cloud_env() {
@@ -116,13 +126,6 @@ create_cloud_env() {
 #export ACCUMULO_HOME=REPLACE_ACCUMULO_HOME
 #export PATH=$CLOUD_INSTALL_HOME/bin:$HADOOP_PREFIX/bin:$ZOOKEEPER_HOME/bin:$ACCUMULO_HOME/bin:$PATH
 #source "$(_script_dir)/cloud-env"
-}
-
-start_zookeeper() {
-  cd $ZOOKEEPER_HOME
-  mkdir -p "${CLOUD_INSTALL_HOME}/zk-data" #how can I pass this in?
-  echo "Starting Zookeeper"
-  ./bin/zkServer.sh start
 }
 
 init_accumulo() {
@@ -150,15 +153,15 @@ run_checks() {
 }
 
 setup_hadoop() {
-  replace_hadoop_conf && format_namenode && start_hadoop
+  setup_hadoop_conf && format_namenode && start_hadoop
 }
 
 setup_zookeeper() {
-  replace_zookeeper_conf && start_zookeeper
+  setup_zookeeper_conf && start_zookeeper
 }
 
 setup_accumulo() {
-  replace_accumulo_conf && init_accumulo && start_accumulo
+  setup_accumulo_conf && init_accumulo && start_accumulo
 }
 
-run_checks && setup_hadoop #&& setup_zookeeper && setup_accumulo && finish
+run_checks && setup_hadoop && setup_zookeeper #&& setup_accumulo && finish

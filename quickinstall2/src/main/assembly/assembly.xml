@@ -6,14 +6,13 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
+      <directory>${quickinstall.location}/bin</directory>
+      <outputDirectory>quickinstall-home</outputDirectory>
+      <fileMode>755</fileMode>
+    </fileSet>
+    <fileSet>
       <directory>${quickinstall.location}</directory>
       <outputDirectory>quickinstall-home</outputDirectory>
     </fileSet>
-    <!--
-    <fileSet>
-      <directory>src/main/resources</directory>
-      <outputDirectory>quickinstall-home</outputDirectory>
-    </fileSet>
-    -->
   </fileSets>
 </assembly>
