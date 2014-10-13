@@ -23,22 +23,12 @@
   </property>
   <property>
     <name>dfs.name.dir</name>
-    <value>/Users/mjwall/src/accumulo-quickstart/quickinstall2/target/quickinstall-home/hdfs/name</value>
+    <value>QI_HDFS_DIR/name</value>
     <final>true</final>
   </property>
   <property>
     <name>dfs.data.dir</name>
-    <value>/Users/mjwall/src/accumulo-quickstart/quickinstall2/target/quickinstall-home/hdfs/data</value>
+    <value>QI_HDFS_DIR/data</value>
     <final>true</final>
-  </property>
-  <property>
-    <name>fs.checkpoint.dir</name>
-    <value>/Users/mjwall/src/accumulo-quickstart/quickinstall2/target/quickinstall-home/hdfs/checkpoint_dir</value>
-    <final>true</final>
-  </property>
-  <!-- https://issues.apache.org/jira/browse/ACCUMULO-623 -->
-  <property>
-    <name>dfs.support.append</name>
-    <value>true</value>
   </property>
 </configuration>

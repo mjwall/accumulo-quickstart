@@ -18,16 +18,7 @@
 
 <configuration>
   <property>
-    <name>mapred.job.tracker</name>
-    <value>localhost:9001</value>
-  </property>
-  <property>
     <name>mapreduce.framework.name</name>
     <value>yarn</value>
   </property>
-  <property>
-    <name>mapred.local.dir</name>
-    <value>/Users/mjwall/src/accumulo-quickstart/quickinstall2/target/quickinstall-home/mapred</value>
-  </property>
-  <!-- mapred.system.dir is an hdfs directory -->
 </configuration>

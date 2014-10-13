@@ -23,13 +23,16 @@
 # set JAVA_HOME in this file, so that it is correctly defined on
 # remote nodes.
 
+export HADOOP_HOME=QI_HADOOP_HOME
+
 # The java implementation to use.
-export JAVA_HOME=${JAVA_HOME}
+export JAVA_HOME=QI_JAVA_HOME
 
 # The jsvc implementation to use. Jsvc is required to run secure datanodes.
 #export JSVC_HOME=${JSVC_HOME}
 
-export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-"/etc/hadoop"}
+#export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-"/etc/hadoop"}
+export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 
 # Extra Java CLASSPATH elements.  Automatically insert capacity-scheduler.
 for f in $HADOOP_HOME/contrib/capacity-scheduler/*.jar; do
@@ -47,6 +50,7 @@ done
 # Extra Java runtime options.  Empty by default.
 export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true"
 
+# export HADOOP_OPTS=-server
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
   export HADOOP_OPTS="${HADOOP_OPTS} -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
