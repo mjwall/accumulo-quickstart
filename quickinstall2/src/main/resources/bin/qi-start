@@ -1,16 +1,26 @@
 #!/bin/bash
-# make sure your environment variables are set correctly, see
-# accumulo-quickstart/install/bin/cloud-env.  You may also source
-# that file from the command line first
+# Start Accumulo and friends
 
-# start hadoop
-hd-start-all
+if [ -z "QI_HOME" ]; then
+  echo "QI_HOME is not set.  Source the cloud-env"
+  exit 1
+fi
 
-# give HDFS time to come up
-sleep 45
+echo "Starting Hadoop"
+${HADOOP_HOME}/sbin/start-dfs.sh
+echo "Waiting for hadoop to come out of safeMode"
+local x=0
+while [ $x -lt 5 ]
+do
+  # try 2 times, for slow computers
+  ${HADOOP_HOME}/bin/hdfs dfsadmin -safemode wait && x=5
+  x=$(( $x + 1 ))
+done
+echo "Starting Yarn"
+${HADOOP_HOME}/sbin/start-yarn.sh
 
-# start zookeeper
-zk-start
+echo "Starting Zookeeper"
+$ZOOKEEPER_HOME/bin/zkServer.sh start
 
-# start accumulo
-acc-start-all
+echo "Starting Accumulo"
+${ACCUMULO_HOME}/bin/start-all.sh

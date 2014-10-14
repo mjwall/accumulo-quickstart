@@ -108,44 +108,71 @@ start_zookeeper() {
 }
 
 setup_accumulo_conf() {
-  echo "Replacing accumulo conf"
-}
-
-create_cloud_env() {
-  echo "Creating the cloud-env file"
-####
-##!/bin/bash
-#export JAVA_HOME=REPLACE_JAVA_HOME
-#export CLOUD_INSTALL_HOME=REPLACE_CLOUD_INSTALL_HOME
-#export HADOOP_PREFIX=REPLACE_HADOOP_PREFIX
-#if [ ! -z $HADOOP_HOME ]; then
-#  echo "Unsetting HADOOP_HOME, we only use HADOOP_PREFIX"
-#  unset HADOOP_HOME
-#fi
-#export ZOOKEEPER_HOME=REPLACE_ZOOKEEPER_HOME
-#export ACCUMULO_HOME=REPLACE_ACCUMULO_HOME
-#export PATH=$CLOUD_INSTALL_HOME/bin:$HADOOP_PREFIX/bin:$ZOOKEEPER_HOME/bin:$ACCUMULO_HOME/bin:$PATH
-#source "$(_script_dir)/cloud-env"
+  echo "Setting up Accumulo conf"
+  ACCUMULO_HOME="${QI_HOME}/accumulo-1.6.1"
+  cp -R ${ACCUMULO_HOME}/conf/examples/2GB/standalone/* ${ACCUMULO_HOME}/conf/.
+  sed -i '' -e "s|JAVA_HOME=/path/to/java|JAVA_HOME=${JAVA_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
+  sed -i '' -e "s|ZOOKEEPER_HOME=/path/to/zookeeper|ZOOKEEPER_HOME=${ZOOKEEPER_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
+  cat <<'EOF' >> ${ACCUMULO_HOME}/conf/accumulo-env.sh
+if [ "$(uname)" == "Darwin" ]; then
+  # https://issues.apache.org/jira/browse/HADOOP-7489
+  export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Djava.security.krb5.realm= -Djava.security.krb5.kdc="
+  # same fix, but for java 7, see
+  export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Djava.security.krb5.config=/dev/null"
+  # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
+  export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Dapple.awt.UIElement=true"
+fi
+EOF
+  export ACCUMULO_HOME
 }
 
 init_accumulo() {
-  # how can I pass in the instancename, password and username?
-  cd $ACCUMULO_HOME
-  echo "Initing Accumulo as root@accumulo, password is secret"
-  ./bin/accumulo init --clear-instance-name --instance-name accumulo --password secret --username root
+  echo "Initing Accumulo as root@accumulo, password is quickinstall"
+  ${ACCUMULO_HOME}/bin/accumulo init --clear-instance-name --instance-name accumulo --password quickinstall
 }
 
 start_accumulo() {
-   echo "Starting Accumulo"
-  ./bin/start-all.sh
+  echo "Starting Accumulo"
+  ${ACCUMULO_HOME}/bin/start-all.sh
 }
 
 finish() {
-  create_cloud_env
-  echo "Accumulo is now running from ${CLOUD_INSTALL_HOME}"
-  echo -e "You should run \n  source ${CLOUD_INSTALL_HOME}/bin/cloud-env\n and get to work.  The monitor page should be available at http://localhost:50095"
-  # make this script unexecutable
-  chmod 644 "$(_script_dir)/$(basename $0)"
+  echo "Creating the cloud-env file"
+  cloudenv="#!/bin/bash
+_script_dir() {
+    if [ -z \"\${SCRIPT_DIR}\" ]; then
+    # even resolves symlinks, see
+    # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+        local SOURCE=\"\${BASH_SOURCE[0]}\"
+        while [ -h \"\$SOURCE\" ] ; do SOURCE=\"\$(readlink \"$SOURCE\")\"; done
+        SCRIPT_DIR=\"\$( cd -P \"$( dirname \"$SOURCE\" )\" && pwd )\"
+    fi
+    echo \"\${SCRIPT_DIR}\"
+}
+
+export QI_HOME=${QI_HOME}
+if [ \"\$(_script_dir)\" != \"\${QI_HOME}/bin\" ]; then
+  echo \"Looks like you moved the quickinstall.  Sorry, that is not supported.\"
+  unset QI_HOME
+else
+  echo \"Setting up the Accumulo quickinstall in \${QI_HOME}\"
+  export JAVA_HOME=\"${JAVA_HOME}\"
+  export HADOOP_HOME=\"${HADOOP_HOME}\"
+  export ZOOKEEPER_HOME=\"${ZOOKEEPER_HOME}\"
+  export ACCUMULO_HOME=\"${ACCUMULO_HOME}\"
+  export PATH=\${QI_HOME}/bin:\${HADOOP_HOME}/bin:\${ZOOKEEPER_HOME}/bin:\${ACCUMULO_HOME}/bin:\${PATH}
+fi"
+  echo "${cloudenv}" > ${QI_HOME}/bin/cloud-env
+  chmod 755 ${QI_HOME}/bin/cloud-env
+  # make it harder to run the setup again
+  chmod 400 $(_script_dir)/setup-quickinstall.sh
+  echo "Accumulo is now running from ${QI_HOME}"
+  echo "You should run"
+  echo "    source ${QI_HOME}/bin/cloud-env"
+  echo "and get to work.  Here are some useful links."
+  echo "  The Accumulo monitor page should be available at http://localhost:50095"
+  echo "  HDFS should be available at http://localhost:50070"
+  echo "  The Yarn resource manager should be available at http://localhost:8088"
 }
 
 run_checks() {
@@ -164,4 +191,4 @@ setup_accumulo() {
   setup_accumulo_conf && init_accumulo && start_accumulo
 }
 
-run_checks && setup_hadoop && setup_zookeeper #&& setup_accumulo && finish
+run_checks && setup_hadoop && setup_zookeeper && setup_accumulo && finish

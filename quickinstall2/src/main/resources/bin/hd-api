@@ -5,4 +5,4 @@ if [ "$(uname)" == "Darwin" ]; then
 else
   CMD="xdg-open"
 fi
-${CMD} $HADOOP_PREFIX/docs/api/index.html
+${CMD} $HADOOP_HOME/share/doc/hadoop/api/index.html

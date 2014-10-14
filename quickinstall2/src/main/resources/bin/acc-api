@@ -5,4 +5,6 @@ if [ "$(uname)" == "Darwin" ]; then
 else
   CMD="xdg-open"
 fi
-${CMD} $ACCUMULO_HOME/docs/apidocs/index.html
+echo "Accumulo API docs no longer shipped with the tarball, try http://accumulo.apache.org/1.6/apidocs/"
+#TODO: download the source and build the javadocs for inclusion
+#${CMD} $ACCUMULO_HOME/docs/apidocs/index.html

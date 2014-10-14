@@ -6,8 +6,10 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
+      <!-- maybe there is a better way to control permissions than to
+           just copy again? -->
       <directory>${quickinstall.location}/bin</directory>
-      <outputDirectory>quickinstall-home</outputDirectory>
+      <outputDirectory>quickinstall-home/bin</outputDirectory>
       <fileMode>755</fileMode>
     </fileSet>
     <fileSet>

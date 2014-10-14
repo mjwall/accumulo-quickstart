@@ -3,9 +3,9 @@
   <groupId>com.accumulobook</groupId>
   <artifactId>accumulo-quickinstall</artifactId>
   <packaging>pom</packaging>
-  <version>1.6.0</version>
+  <version>1.6.1</version>
   <description>Create a standalone distribution of the Apache Accumulo
-  Project version 1.6.0 with dependencies</description>
+  Project version ${project.version} with dependencies</description>
   <name>AccumuloBook QuickInstall</name>
   <pluginRepositories>
     <pluginRepository>
@@ -20,13 +20,16 @@
     </pluginRepository>
   </pluginRepositories>
   <properties>
-    <quickinstall.location>${project.build.directory}/quickinstall-tmp</quickinstall.location>
-    <hadoop.url>http://archive.apache.org/dist/hadoop/core/hadoop-2.4.1/hadoop-2.4.1.tar.gz</hadoop.url>
+    <quickinstall.location>${project.build.directory}/archive-tmp</quickinstall.location>
+    <hadoop.version>2.4.1</hadoop.version>
+    <hadoop.url>http://archive.apache.org/dist/hadoop/core/hadoop-${hadoop.version}/hadoop-${hadoop.version}.tar.gz</hadoop.url>
     <hadoop.md5>0ce4cfd282002b7aa42cf71df4145150</hadoop.md5>
-    <zookeeper.url>http://archive.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz</zookeeper.url>
+    <zookeeper.version>3.4.6</zookeeper.version>
+    <zookeeper.url>http://archive.apache.org/dist/zookeeper/zookeeper-${zookeeper.version}/zookeeper-${zookeeper.version}.tar.gz</zookeeper.url>
     <zookeeper.md5>971c379ba65714fd25dc5fe8f14e9ad1</zookeeper.md5>
-    <accumulo.url>http://archive.apache.org/dist/accumulo/1.6.0/accumulo-1.6.0-bin.tar.gz</accumulo.url>
-    <accumulo.md5>003fcc1999c3cf02d66b5d7ec4225ccc</accumulo.md5>
+    <accumulo.version>${project.version}</accumulo.version>
+    <accumulo.url>http://archive.apache.org/dist/accumulo/${accumulo.version}/accumulo-${accumulo.version}-bin.tar.gz</accumulo.url>
+    <accumulo.md5>523d3ab55a6fe2b48c0a1d012f9c2ffc</accumulo.md5>
   </properties>
   <build>
     <plugins>
@@ -123,7 +126,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 </project>

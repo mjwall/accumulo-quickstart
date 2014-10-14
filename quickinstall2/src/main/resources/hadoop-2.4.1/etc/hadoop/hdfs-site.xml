@@ -31,4 +31,8 @@
     <value>QI_HDFS_DIR/data</value>
     <final>true</final>
   </property>
+  <property>
+    <name>dfs.datanode.synconclose</name>
+    <value>true</value>
+  </property>
 </configuration>
