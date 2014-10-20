@@ -54,7 +54,7 @@ check_ssh() {
   local HOSTNAME=$(hostname)
   local SSH_HOST=$(_ssh)
   if [[ "${HOSTNAME}" != "${SSH_HOST}" ]]; then
-    echo "Problem with SSH, ran ssh -o 'PreferredAuthentications=publickey' localhost \"hostname\". Expected ${HOSTNAME}, but got ${SSH_HOST}. Please see file:///$(_script_dir)/hadoop-2.4.1/share/doc/hadoop/hadoop-project-dist/hadoop-common/SingleCluster.html#Setup_passphraseless_ssh.  Once ssh without a password is working, execute './bin/sbt initAndStart' to finish the install"
+    echo "Problem with SSH, ran ssh -o 'PreferredAuthentications=publickey' localhost \"hostname\". Expected ${HOSTNAME}, but got ${SSH_HOST}. Please see file:///$(_script_dir)/hadoop-2.4.1/share/doc/hadoop/hadoop-project-dist/hadoop-common/SingleCluster.html#Setup_passphraseless_ssh.  Once ssh without a password is working, execute './bin/setup-quickinstall' again"
     ret=1
   fi
   return $ret
@@ -63,12 +63,12 @@ check_ssh() {
 setup_hadoop_conf() {
   echo "Setting up Hadoop conf"
   HADOOP_HOME="${QI_HOME}/hadoop-2.4.1"
-  sed -i '' -e "s|QI_HADOOP_HOME|${HADOOP_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
-  sed -i '' -e "s|QI_JAVA_HOME|${JAVA_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
+  sed -i'' -e "s|QI_HADOOP_HOME|${HADOOP_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
+  sed -i'' -e "s|QI_JAVA_HOME|${JAVA_HOME}|" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
   HDFS_DIR="${QI_HOME}/hdfs"
   mkdir -p ${HDFS_DIR}/name
   mkdir -p ${HDFS_DIR}/data
-  sed -i '' -e "s|QI_HDFS_DIR|${HDFS_DIR}|g" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+  sed -i'' -e "s|QI_HDFS_DIR|${HDFS_DIR}|g" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
   export HADOOP_HOME
 }
 
@@ -95,10 +95,10 @@ start_hadoop() {
 setup_zookeeper_conf() {
   echo "Setting up Zookeeper conf"
   ZOOKEEPER_HOME="${QI_HOME}/zookeeper-3.4.6"
-  sed -i '' -e "s|QI_ZOOKEEPER_HOME|${ZOOKEEPER_HOME}|" ${ZOOKEEPER_HOME}/bin/zkEnv.sh
+  sed -i'' -e "s|QI_ZOOKEEPER_HOME|${ZOOKEEPER_HOME}|" ${ZOOKEEPER_HOME}/bin/zkEnv.sh
   ZOO_DATA="${QI_HOME}/zk-data"
   mkdir -p ${ZOO_DATA}
-  sed -i '' -e "s|QI_ZOO_DATA|${ZOO_DATA}|" ${ZOOKEEPER_HOME}/conf/zoo.cfg
+  sed -i'' -e "s|QI_ZOO_DATA|${ZOO_DATA}|" ${ZOOKEEPER_HOME}/conf/zoo.cfg
   export ZOOKEEPER_HOME
 }
 
@@ -111,8 +111,8 @@ setup_accumulo_conf() {
   echo "Setting up Accumulo conf"
   ACCUMULO_HOME="${QI_HOME}/accumulo-1.6.1"
   cp -R ${ACCUMULO_HOME}/conf/examples/2GB/standalone/* ${ACCUMULO_HOME}/conf/.
-  sed -i '' -e "s|JAVA_HOME=/path/to/java|JAVA_HOME=${JAVA_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
-  sed -i '' -e "s|ZOOKEEPER_HOME=/path/to/zookeeper|ZOOKEEPER_HOME=${ZOOKEEPER_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
+  sed -i'' -e "s|JAVA_HOME=/path/to/java|JAVA_HOME=${JAVA_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
+  sed -i'' -e "s|ZOOKEEPER_HOME=/path/to/zookeeper|ZOOKEEPER_HOME=${ZOOKEEPER_HOME}|" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   cat <<'EOF' >> ${ACCUMULO_HOME}/conf/accumulo-env.sh
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
