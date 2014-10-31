@@ -1,0 +1,24 @@
+#!/bin/bash
+_script_dir() {
+    if [ -z "${SCRIPT_DIR}" ]; then
+    # even resolves symlinks, see
+    # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+        local SOURCE="${BASH_SOURCE[0]}"
+        while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+        SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    fi
+    echo "${SCRIPT_DIR}"
+}
+
+export QI_HOME=QI_QI_HOME
+if [ "$(_script_dir)" != "${QI_HOME}/bin" ]; then
+  echo "Looks like you moved the quickinstall.  Sorry, that is not supported."
+  unset QI_HOME
+else
+  echo "Setting up the Accumulo Quickinstall in ${QI_HOME}"
+  export JAVA_HOME="QI_JAVA_HOME"
+  export HADOOP_HOME="QI_HADOOP_HOME"
+  export ZOOKEEPER_HOME="QI_ZOOKEEPER_HOME"
+  export ACCUMULO_HOME="QI_ACCUMULO_HOME"
+  export PATH=${QI_HOME}/bin:${HADOOP_HOME}/bin:${ZOOKEEPER_HOME}/bin:${ACCUMULO_HOME}/bin:${PATH}
+fi
