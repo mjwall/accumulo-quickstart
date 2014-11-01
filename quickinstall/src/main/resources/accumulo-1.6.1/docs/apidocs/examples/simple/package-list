@@ -1,0 +1,12 @@
+org.apache.accumulo.examples.simple.client
+org.apache.accumulo.examples.simple.combiner
+org.apache.accumulo.examples.simple.constraints
+org.apache.accumulo.examples.simple.dirlist
+org.apache.accumulo.examples.simple.filedata
+org.apache.accumulo.examples.simple.helloworld
+org.apache.accumulo.examples.simple.isolation
+org.apache.accumulo.examples.simple.mapreduce
+org.apache.accumulo.examples.simple.mapreduce.bulk
+org.apache.accumulo.examples.simple.reservations
+org.apache.accumulo.examples.simple.shard
+org.apache.accumulo.examples.simple.shell

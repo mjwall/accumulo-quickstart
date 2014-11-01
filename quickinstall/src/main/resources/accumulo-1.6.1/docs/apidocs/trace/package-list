@@ -1,0 +1,5 @@
+org.apache.accumulo.trace.instrument
+org.apache.accumulo.trace.instrument.impl
+org.apache.accumulo.trace.instrument.receivers
+org.apache.accumulo.trace.instrument.thrift
+org.apache.accumulo.trace.thrift

@@ -1,0 +1,6 @@
+org.apache.accumulo.master
+org.apache.accumulo.master.recovery
+org.apache.accumulo.master.state
+org.apache.accumulo.master.tableOps
+org.apache.accumulo.master.tserverOps
+org.apache.accumulo.master.util

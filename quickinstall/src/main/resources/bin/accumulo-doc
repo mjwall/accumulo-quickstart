@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$(uname)" == "Darwin" ]; then
+  CMD="open"
+else
+  CMD="xdg-open"
+fi
+${CMD} $ACCUMULO_HOME/docs/index.html || echo "Sorry, couldn't open the doc.  Point your browser to file:///${ACCUMULO_HOME}/docs/index.html"

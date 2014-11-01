@@ -1,0 +1,18 @@
+#!/bin/bash
+# Stop Accumulo and friends
+
+if [ -z "QI_HOME" ]; then
+  echo "QI_HOME is not set.  Source the cloud-env"
+  exit 1
+fi
+
+echo "Stopping Accumulo"
+${ACCUMULO_HOME}/bin/stop-all.sh
+
+echo "Stopping Zookeeper"
+$ZOOKEEPER_HOME/bin/zkServer.sh stop
+
+echo "Stopping Yarn"
+${HADOOP_HOME}/sbin/stop-yarn.sh
+echo "Stopping Hadoop"
+${HADOOP_HOME}/sbin/stop-dfs.sh

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$(uname)" == "Darwin" ]; then
+  CMD="open"
+else
+  CMD="xdg-open"
+fi
+${CMD} $HADOOP_HOME/share/doc/hadoop/index.html || echo "Sorry, couldn't open the docs, point your browser to file:///${HADOOP_HOME}/share/doc/hadoop/index.html"
