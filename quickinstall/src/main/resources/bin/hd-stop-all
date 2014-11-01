@@ -1,5 +1,0 @@
-#!/bin/bash
-echo "Stopping Hadoop"
-CDPATH=:/
-cd $HADOOP_PREFIX
-bin/stop-all.sh

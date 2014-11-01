@@ -1,5 +1,0 @@
-#!/bin/bash
-echo "Stopping Accumulo"
-CDPATH=:/
-cd $ACCUMULO_HOME
-bin/stop-all.sh

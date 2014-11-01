@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [ "$(uname)" == "Darwin" ]; then
-  CMD="open"
-else
-  CMD="xdg-open"
-fi
-${CMD} $ACCUMULO_HOME/docs/apidocs/index.html
