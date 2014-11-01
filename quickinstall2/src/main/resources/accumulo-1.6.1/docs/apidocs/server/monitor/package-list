@@ -1,0 +1,5 @@
+org.apache.accumulo.monitor
+org.apache.accumulo.monitor.servlets
+org.apache.accumulo.monitor.servlets.trace
+org.apache.accumulo.monitor.util
+org.apache.accumulo.monitor.util.celltypes

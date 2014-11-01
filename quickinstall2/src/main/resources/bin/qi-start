@@ -9,8 +9,8 @@ fi
 echo "Starting Hadoop"
 ${HADOOP_HOME}/sbin/start-dfs.sh
 echo "Waiting for hadoop to come out of safeMode"
-local x=0
-while [ $x -lt 5 ]
+x=0
+while [[ $x -lt 5 ]]
 do
   # try 2 times, for slow computers
   ${HADOOP_HOME}/bin/hdfs dfsadmin -safemode wait && x=5

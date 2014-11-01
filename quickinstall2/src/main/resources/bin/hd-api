@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [ "$(uname)" == "Darwin" ]; then
-  CMD="open"
-else
-  CMD="xdg-open"
-fi
-${CMD} $HADOOP_HOME/share/doc/hadoop/api/index.html

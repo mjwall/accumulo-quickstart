@@ -37,6 +37,8 @@ check_java_home() {
     echo "JAVA_HOME does not point to an existing directory but to $JAVA_HOME.  Fix and try again"
     exit 1
   fi
+  JAVA_VERSION=$(${JAVA_HOME}/bin/java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\.\2/; 1q')
+  echo "Using java version ${JAVA_VERSION}"
 }
 
 check_running() {
@@ -81,6 +83,20 @@ setup_hadoop_conf() {
   mkdir -p ${HDFS_DIR}/name
   mkdir -p ${HDFS_DIR}/data
   _replace_stuff "QI_HDFS_DIR" "${HDFS_DIR}" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+  # Native libraries for Linux are included
+  # attempt to use native libraries if on Mac
+  if [ "$(uname)" == "Darwin" ]; then
+    if [ "$JAVA_VERSION" == "1.7" ] || [ "$JAVA_VERSION" == "1.8" ]; then
+      echo "Moving precompiled native libraries"
+      echo "Native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
+      echo "http://gauravkohli.com/2014/09/28/building-native-hadoop-v-2-4-1-libraries-for-os-x/"
+      echo "Remove the \${HADOOP_HOME}/lib/native directory if you have problems"
+      mv ${HADOOP_HOME}/lib/native ${HADOOP_HOME}/lib/linux-native
+      mv ${HADOOP_HOME}/lib/darwin-native ${HADOOP_HOME}/lib/native
+    else
+      echo "Sorry, you are not running Java 1.7 or 1.8.  Unable to provide native hadoop libraries"
+    fi
+  fi
   export HADOOP_HOME
 }
 
@@ -122,7 +138,14 @@ start_zookeeper() {
 setup_accumulo_conf() {
   echo "Setting up Accumulo conf"
   ACCUMULO_HOME="${QI_HOME}/accumulo-1.6.1"
-  cp -R ${ACCUMULO_HOME}/conf/examples/2GB/standalone/* ${ACCUMULO_HOME}/conf/.
+  echo "Attempting to build Accumulo native libraries"
+  EXAMPLE_CONFIG="2GB/native-standalone"
+  local return_dir=${PWD}
+  cd ${ACCUMULO_HOME}
+  ./bin/build_native_library.sh || EXAMPLE_CONFIG="2BG/standalone"
+  cd ${return_dir}
+  echo "Starting configs are from ${EXAMPLE_CONFIG}"
+  cp -R ${ACCUMULO_HOME}/conf/examples/${EXAMPLE_CONFIG}/* ${ACCUMULO_HOME}/conf/.
   _replace_stuff "JAVA_HOME=/path/to/java" "JAVA_HOME=${JAVA_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   _replace_stuff "ZOOKEEPER_HOME=/path/to/zookeeper" "ZOOKEEPER_HOME=${ZOOKEEPER_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   cat <<'EOF' >> ${ACCUMULO_HOME}/conf/accumulo-env.sh
@@ -133,14 +156,19 @@ if [ "$(uname)" == "Darwin" ]; then
   export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Djava.security.krb5.config=/dev/null"
   # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
   export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Dapple.awt.UIElement=true"
+  # Hadoop native libraries
+  export DYLD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${DYLD_LIBRARY_PATH}
+else
+  export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}
 fi
 EOF
   export ACCUMULO_HOME
 }
 
 init_accumulo() {
-  echo "Initing Accumulo as root@accumulo, password is quickinstall"
-  ${ACCUMULO_HOME}/bin/accumulo init --clear-instance-name --instance-name accumulo --password quickinstall
+  ROOT_PASS="secret" #need to change the trace user pass if this is different in accumulo-site.xml
+  echo "Initing Accumulo as root@accumulo, password is ${ROOT_PASS}"
+  ${ACCUMULO_HOME}/bin/accumulo init --clear-instance-name --instance-name accumulo --password ${ROOT_PASS}
 }
 
 start_accumulo() {
@@ -156,16 +184,47 @@ finish() {
   _replace_stuff "QI_HADOOP_HOME" "${HADOOP_HOME}" ${ENV_FILE}
   _replace_stuff "QI_ZOOKEEPER_HOME" "${ZOOKEEPER_HOME}" ${ENV_FILE}
   _replace_stuff "QI_ACCUMULO_HOME" "${ACCUMULO_HOME}" ${ENV_FILE}
-  chmod 755 ${ENV_FILE}
-  # make it harder to run the setup again
+  # make all files executable
+  chmod 755 ${QI_HOME}/bin/*
+  # leave this script 400 and rename it
   chmod 400 $(_script_dir)/setup-quickinstall.sh
-  echo "Accumulo is now running from ${QI_HOME}"
-  echo "You should run"
-  echo "    source ${ENV_FILE}"
-  echo "and get to work.  Here are some useful links."
-  echo "  The Accumulo monitor page should be available at http://localhost:50095"
-  echo "  HDFS should be available at http://localhost:50070"
-  echo "  The Yarn resource manager should be available at http://localhost:8088"
+  mv $(_script_dir)/setup-quickinstall.sh $(_script_dir)/setup-quickinstall.sh.already.run
+  cat <<-EOF
+Accumulo is now running from ${QI_HOME}
+You should run
+
+    source ${ENV_FILE}
+
+and get to work.  The root accumulo user password is "${ROOT_PASS}".
+
+After sourcing the env file, your PATH will be setup.  Source that
+file whenever you want to work with the Accumulo Quickinstall
+
+To stop Accumulo, Zookeeper and Hadoop run
+
+    qi-stop
+
+To start it up again, run
+
+    qi-start
+
+There will also be a couple of shortcut commands to open the local docs.
+These pages link to local copies of the API docs.  Run
+
+    accumulo-doc
+
+or
+
+    hadoop-doc
+
+Here are some useful links.
+  The Accumulo monitor page should be available at http://localhost:50095
+  HDFS should be available at http://localhost:50070"
+  The Yarn resource manager should be available at http://localhost:8088
+
+Happy Accumulating
+
+EOF
 }
 
 run_checks() {
