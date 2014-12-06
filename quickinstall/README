@@ -1,7 +1,40 @@
 AccumuloBook QuickInstall
 
-This project can be used to create a tar.gz that includes Accumulo and all dependencies ready to run in a standalone mode.  The only requirements are Maven 3.x and Java 1.7.
+******************************************************************************
+0. Introduction
 
-Users can also download the distribution, unpack it somewhere and go.
 
-TODO: write more
+This project creates a tar.gz that includes Accumulo and all dependencies. The
+archive file unpacks into one directory and sets up Accumulo to run on one node.
+The only requirement to run is Java 1.7.
+
+
+******************************************************************************
+1. Installation
+
+There are three steps to install the AccumuloBook QuickInstall.
+
+    - Download the file from
+      https://github.com/accumulobook/accumulo-quickstart/wiki
+
+    - Extract that file, will all be contained in a quickinstall-home directory
+
+    - Change directory to quickinstall-home and run
+
+        bash bin/setup-quickinstall.sh
+
+******************************************************************************
+2. Usage
+
+After running the setup-quickinstall.sh
+
+
+******************************************************************************
+3. Note about native libraries
+
+
+******************************************************************************
+4. Building the tar.gz
+
+
+    TODO: write more
