@@ -87,15 +87,32 @@ setup_hadoop_conf() {
   # attempt to use native libraries if on Mac
   if [ "$(uname)" == "Darwin" ]; then
     if [ "$JAVA_VERSION" == "1.7" ] || [ "$JAVA_VERSION" == "1.8" ]; then
-      echo "Moving precompiled native libraries"
-      echo "Native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
+      echo "Using Mac OSX native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
       echo "http://gauravkohli.com/2014/09/28/building-native-hadoop-v-2-4-1-libraries-for-os-x/"
-      echo "Remove the \${HADOOP_HOME}/lib/native directory if you have problems"
-      mv ${HADOOP_HOME}/lib/native ${HADOOP_HOME}/lib/linux-native
-      mv ${HADOOP_HOME}/lib/darwin-native ${HADOOP_HOME}/lib/native
+      echo "Remove the symlink in \${HADOOP_HOME}/lib/ if you have problems"
+      for f in ${HADOOP_HOME}/lib/darwin-native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
     else
       echo "Sorry, you are not running Java 1.7 or 1.8.  Unable to provide native hadoop libraries"
     fi
+  elif [ "$(uname)" == "Linux" ]; then
+    if [ "$(uname -m)" == "x86_64" ]; then
+      echo "Using 64 bit native libraries built on CentOS 6.6 with Java 1.7 using the instructions at"
+      echo "http://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/NativeLibraries.html"
+      echo "Remove symlink in \${HADOOP_HOME}/lib/ directory if you have a problem"
+      for f in ${HADOOP_HOME}/lib/linux-64-native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
+    else
+      echo "Using 32 bit native libraries packaged with Hadoop"
+      echo "Remove symlinks in \${HADOOP_HOME}/lib directory if you have a problem"
+      for f in ${HADOOP_HOME}/lib/native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
+    fi
+  else
+    echo "Unknown OS, not trying to use any native libraries"
   fi
   export HADOOP_HOME
 }
@@ -112,7 +129,7 @@ start_hadoop() {
   local x=0
   while [ $x -lt 5 ]
   do
-    # try 2 times, for slow computers
+    # try 5 times, for slow computers
     ${HADOOP_HOME}/bin/hdfs dfsadmin -safemode wait && x=5
     x=$(( $x + 1 ))
   done
@@ -148,6 +165,7 @@ setup_accumulo_conf() {
   cp -R ${ACCUMULO_HOME}/conf/examples/${EXAMPLE_CONFIG}/* ${ACCUMULO_HOME}/conf/.
   _replace_stuff "JAVA_HOME=/path/to/java" "JAVA_HOME=${JAVA_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   _replace_stuff "ZOOKEEPER_HOME=/path/to/zookeeper" "ZOOKEEPER_HOME=${ZOOKEEPER_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
+  _replace_stuff "lib/native:" "lib:" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   cat <<'EOF' >> ${ACCUMULO_HOME}/conf/accumulo-env.sh
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
