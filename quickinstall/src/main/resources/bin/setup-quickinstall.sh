@@ -165,7 +165,6 @@ setup_accumulo_conf() {
   cp -R ${ACCUMULO_HOME}/conf/examples/${EXAMPLE_CONFIG}/* ${ACCUMULO_HOME}/conf/.
   _replace_stuff "JAVA_HOME=/path/to/java" "JAVA_HOME=${JAVA_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   _replace_stuff "ZOOKEEPER_HOME=/path/to/zookeeper" "ZOOKEEPER_HOME=${ZOOKEEPER_HOME}" ${ACCUMULO_HOME}/conf/accumulo-env.sh
-  _replace_stuff "lib/native:" "lib:" ${ACCUMULO_HOME}/conf/accumulo-env.sh
   cat <<'EOF' >> ${ACCUMULO_HOME}/conf/accumulo-env.sh
 if [ "$(uname)" == "Darwin" ]; then
   # https://issues.apache.org/jira/browse/HADOOP-7489
@@ -175,9 +174,9 @@ if [ "$(uname)" == "Darwin" ]; then
   # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
   export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Dapple.awt.UIElement=true"
   # Hadoop native libraries
-  export DYLD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${DYLD_LIBRARY_PATH}
+  export DYLD_LIBRARY_PATH=${HADOOP_PREFIX}/lib:${DYLD_LIBRARY_PATH}
 else
-  export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}
+  export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib:${LD_LIBRARY_PATH}
 fi
 EOF
   export ACCUMULO_HOME
