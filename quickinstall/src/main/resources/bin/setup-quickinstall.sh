@@ -83,8 +83,12 @@ setup_hadoop_conf() {
   mkdir -p ${HDFS_DIR}/name
   mkdir -p ${HDFS_DIR}/data
   _replace_stuff "QI_HDFS_DIR" "${HDFS_DIR}" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
-  # Native libraries for Linux are included
-  # attempt to use native libraries if on Mac
+  # move existing native libraries to linux-32-native
+  mv "${HADOOP_HOME}/lib/native" "${HADOOP_HOME}/lib/linux-32-native"
+  # there is a bug in this hadoop that requires them under /lib
+  # but this version of bin/accumulo is setting lib/native as part of the
+  # java.library.path so it is getting confused.  Relink below
+  # for the correct version of your OS
   if [ "$(uname)" == "Darwin" ]; then
     if [ "$JAVA_VERSION" == "1.7" ] || [ "$JAVA_VERSION" == "1.8" ]; then
       echo "Using Mac OSX native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
@@ -107,7 +111,7 @@ setup_hadoop_conf() {
     else
       echo "Using 32 bit native libraries packaged with Hadoop"
       echo "Remove symlinks in \${HADOOP_HOME}/lib directory if you have a problem"
-      for f in ${HADOOP_HOME}/lib/native/*; do
+      for f in ${HADOOP_HOME}/lib/linux-32-native/*; do
         ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
       done
     fi
