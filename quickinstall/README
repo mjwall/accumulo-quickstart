@@ -33,7 +33,7 @@ be running.
 
 To setup your path run
 
-    source bin/quickstart-env
+    source bin/quickinstall-env
 
 To stop Accumulo, Zookeeper and Hadoop run
 
