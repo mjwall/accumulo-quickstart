@@ -83,19 +83,40 @@ setup_hadoop_conf() {
   mkdir -p ${HDFS_DIR}/name
   mkdir -p ${HDFS_DIR}/data
   _replace_stuff "QI_HDFS_DIR" "${HDFS_DIR}" ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
-  # Native libraries for Linux are included
-  # attempt to use native libraries if on Mac
+  # move existing native libraries to linux-32-native
+  mv "${HADOOP_HOME}/lib/native" "${HADOOP_HOME}/lib/linux-32-native"
+  # there is a bug in this hadoop that requires them under /lib
+  # but this version of bin/accumulo is setting lib/native as part of the
+  # java.library.path so it is getting confused.  Relink below
+  # for the correct version of your OS
   if [ "$(uname)" == "Darwin" ]; then
     if [ "$JAVA_VERSION" == "1.7" ] || [ "$JAVA_VERSION" == "1.8" ]; then
-      echo "Moving precompiled native libraries"
-      echo "Native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
+      echo "Using Mac OSX native libraries built on OSX 10.8.5 with Java 1.7.0_60 using the instructions at"
       echo "http://gauravkohli.com/2014/09/28/building-native-hadoop-v-2-4-1-libraries-for-os-x/"
-      echo "Remove the \${HADOOP_HOME}/lib/native directory if you have problems"
-      mv ${HADOOP_HOME}/lib/native ${HADOOP_HOME}/lib/linux-native
-      mv ${HADOOP_HOME}/lib/darwin-native ${HADOOP_HOME}/lib/native
+      echo "Remove the symlink in \${HADOOP_HOME}/lib/ if you have problems"
+      for f in ${HADOOP_HOME}/lib/darwin-native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
     else
       echo "Sorry, you are not running Java 1.7 or 1.8.  Unable to provide native hadoop libraries"
     fi
+  elif [ "$(uname)" == "Linux" ]; then
+    if [ "$(uname -m)" == "x86_64" ]; then
+      echo "Using 64 bit native libraries built on CentOS 6.6 with Java 1.7 using the instructions at"
+      echo "http://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/NativeLibraries.html"
+      echo "Remove symlink in \${HADOOP_HOME}/lib/ directory if you have a problem"
+      for f in ${HADOOP_HOME}/lib/linux-64-native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
+    else
+      echo "Using 32 bit native libraries packaged with Hadoop"
+      echo "Remove symlinks in \${HADOOP_HOME}/lib directory if you have a problem"
+      for f in ${HADOOP_HOME}/lib/linux-32-native/*; do
+        ln -s "${f}" "${HADOOP_HOME}/lib/$(basename $f)"
+      done
+    fi
+  else
+    echo "Unknown OS, not trying to use any native libraries"
   fi
   export HADOOP_HOME
 }
@@ -112,7 +133,7 @@ start_hadoop() {
   local x=0
   while [ $x -lt 5 ]
   do
-    # try 2 times, for slow computers
+    # try 5 times, for slow computers
     ${HADOOP_HOME}/bin/hdfs dfsadmin -safemode wait && x=5
     x=$(( $x + 1 ))
   done
@@ -157,9 +178,9 @@ if [ "$(uname)" == "Darwin" ]; then
   # http://stackoverflow.com/questions/17460777/stop-java-coffee-cup-icon-from-appearing-in-doc-on-mac-osx
   export ACCUMULO_GENERAL_OPTS="${ACCUMULO_GENERAL_OPTS} -Dapple.awt.UIElement=true"
   # Hadoop native libraries
-  export DYLD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${DYLD_LIBRARY_PATH}
+  export DYLD_LIBRARY_PATH=${HADOOP_PREFIX}/lib:${DYLD_LIBRARY_PATH}
 else
-  export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib/native:${LD_LIBRARY_PATH}
+  export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib:${LD_LIBRARY_PATH}
 fi
 EOF
   export ACCUMULO_HOME

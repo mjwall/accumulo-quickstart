@@ -91,3 +91,8 @@ export HADOOP_SECURE_DN_PID_DIR=${HADOOP_PID_DIR}
 
 # A string representing this instance of hadoop. $USER by default.
 export HADOOP_IDENT_STRING=$USER
+
+# workaround for https://issues.apache.org/jira/browse/HDFS-4427
+# which appears fixed in later versions
+export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib
+export HADOOP_OPTS="-Djava.library.path=${HADOOP_HOME}/lib ${HADOOP_OPTS}"
