@@ -77,6 +77,12 @@ check_ssh() {
 setup_hadoop_conf() {
   echo "Setting up Hadoop conf"
   HADOOP_HOME="${QI_HOME}/hadoop-2.4.1"
+  HADOOP_PREFIX="${HADOOP_HOME}"
+  HADOOP_YARN_HOME="${HADOOP_HOME}"
+  HADOOP_COMMON_HOME="${HADOOP_HOME}"
+  HADOOP_HDFS_HOME="${HADOOP_HOME}"
+  HADOOP_MAPRED_HOME="${HADOOP_HOME}"
+  HADOOP_CONF_DIR="${HADOOP_PREFIX}/etc/hadoop"
   _replace_stuff "QI_HADOOP_HOME" "${HADOOP_HOME}" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
   _replace_stuff "QI_JAVA_HOME" "${JAVA_HOME}" ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
   HDFS_DIR="${QI_HOME}/hdfs"
@@ -118,7 +124,8 @@ setup_hadoop_conf() {
   else
     echo "Unknown OS, not trying to use any native libraries"
   fi
-  export HADOOP_HOME
+  export HADOOP_HOME HADOOP_PREFIX HADOOP_CONF_DIR HADOOP_COMMON_HOME HADOOP_YARN_HOME HADOOP_HDFS_HOME HADOOP_MAPRED_HOME
+  export HADOOP_CLASSPATH=""
 }
 
 format_namenode() {
@@ -203,6 +210,7 @@ finish() {
   _replace_stuff "QI_QI_HOME" "${QI_HOME}" ${ENV_FILE}
   _replace_stuff "QI_JAVA_HOME" "${JAVA_HOME}" ${ENV_FILE}
   _replace_stuff "QI_HADOOP_HOME" "${HADOOP_HOME}" ${ENV_FILE}
+  _replace_stuff "QI_HADOOP_CONF_DIR" "${HADOOP_CONF_DIR}" ${ENV_FILE}
   _replace_stuff "QI_ZOOKEEPER_HOME" "${ZOOKEEPER_HOME}" ${ENV_FILE}
   _replace_stuff "QI_ACCUMULO_HOME" "${ACCUMULO_HOME}" ${ENV_FILE}
   # make all files executable
