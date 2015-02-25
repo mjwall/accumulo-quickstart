@@ -190,6 +190,8 @@ else
   export LD_LIBRARY_PATH=${HADOOP_PREFIX}/lib:${LD_LIBRARY_PATH}
 fi
 EOF
+  sed -i.bak 's!<value>root</value>!<value>trace</value>!g' ${ACCUMULO_HOME}/conf/accumulo-site.xml
+  sed -i.bak 's!<value>secret</value>!<value>trace</value>!g' ${ACCUMULO_HOME}/conf/accumulo-site.xml
   export ACCUMULO_HOME
 }
 
@@ -276,6 +278,16 @@ setup_zookeeper() {
 
 setup_accumulo() {
   setup_accumulo_conf && init_accumulo && start_accumulo
+  TMPFILE=`mktemp /tmp/${tempfoo}.XXXXXX` || exit 1
+  cat <<EOF > ${TMPFILE}
+createuser trace
+createtable trace
+grant -u trace Table.WRITE -t trace
+grant -u trace Table.READ -t trace
+grant -u trace Table.ALTER_TABLE -t trace
+EOF
+
+  echo -e 'trace\ntrace\n' | ${ACCUMULO_HOME}/bin/accumulo shell -u root -p secret -f ${TMPFILE} && rm ${TMPFILE}
 }
 
 run_checks && setup_hadoop && setup_zookeeper && setup_accumulo && finish
