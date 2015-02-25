@@ -211,6 +211,9 @@ finish() {
   chmod 400 $(_script_dir)/setup-quickinstall.sh
   mv $(_script_dir)/setup-quickinstall.sh $(_script_dir)/setup-quickinstall.sh.already.run
   cat <<-EOF
+
+************************************************
+
 Accumulo is now running from ${QI_HOME}
 You should run
 
@@ -240,8 +243,11 @@ or
 
 Here are some useful links.
   The Accumulo monitor page should be available at http://localhost:50095
-  HDFS should be available at http://localhost:50070"
+  HDFS should be available at http://localhost:50070
   The Yarn resource manager should be available at http://localhost:8088
+
+You can also reference the README in the quickinstall-home directory for
+more information.
 
 Happy Accumulating
 

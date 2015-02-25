@@ -9,5 +9,12 @@
       <directory>${quickinstall.location}</directory>
       <outputDirectory>quickinstall-home</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}</directory>
+      <outputDirectory>quickinstall-home</outputDirectory>
+      <includes>
+        <include>README</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>
