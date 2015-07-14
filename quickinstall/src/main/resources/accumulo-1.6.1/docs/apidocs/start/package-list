@@ -1,4 +1,0 @@
-org.apache.accumulo.start
-org.apache.accumulo.start.classloader
-org.apache.accumulo.start.classloader.vfs
-org.apache.accumulo.start.classloader.vfs.providers
